@@ -1,70 +1,70 @@
-Career Guidance System
-What This Project Is About
+<h1>Career Guidance System</h1>
+
+<h2>What This Project Is About</h2>
+<p>
 This project is a website designed to help people find the best career path for them. It's like a smart guide that learns about you – your skills, what you like, and how you prefer to work – and then gives you personalized job suggestions. It can even help you create a basic resume!
+</p>
 
-The website has two types of users:
+<p>The website has two types of users:</p>
+<ul>
+  <li><strong>Regular Users:</strong> People who want career advice.</li>
+  <li><strong>Administrators (Admins):</strong> People who manage the website's content, like adding new jobs or skills.</li>
+</ul>
 
-Regular Users: People who want career advice.
+<h2>What It Can Do (Key Features)</h2>
+<ul>
+  <li><strong>Easy Sign-Up and Login:</strong> Create an account and log in easily.</li>
+  <li><strong>Separate Admin Login:</strong> Admins have their own login page for security.</li>
+  <li><strong>Your Personal Profile:</strong> Update your:
+    <ul>
+      <li>School/university name and graduation year</li>
+      <li>Major and GPA</li>
+    </ul>
+  </li>
+  <li><strong>Lots of Skills:</strong> Choose from many computer-related skills like Python, Java, Cloud, AI, etc., with a skill search bar.</li>
+  <li><strong>Detailed Quiz:</strong> Questions about work environment, problem-solving, interests, and personality.</li>
+  <li><strong>Work Experience Summary:</strong> Add your past job experiences.</li>
+  <li><strong>Projects Summary:</strong> Describe your previous projects.</li>
+  <li><strong>Smart Job Suggestions:</strong>
+    <ul>
+      <li>Top Career Paths with a "Compatibility Score"</li>
+      <li>Suggested Skills to Learn</li>
+      <li>Success Prediction Percentage</li>
+    </ul>
+  </li>
+  <li><strong>Quick Resume Builder:</strong> Instantly generate and download a basic resume as PDF.</li>
+  <li><strong>Admin Control Panel:</strong> Admins can:
+    <ul>
+      <li>Manage Careers (Add/Edit/Delete)</li>
+      <li>Manage Skills (Add/Edit/Delete)</li>
+      <li>Manage Users (View/Delete)</li>
+    </ul>
+  </li>
+</ul>
 
-Administrators (Admins): People who manage the website's content, like adding new jobs or skills.
+<h2>What It's Built With (Technologies)</h2>
+<ul>
+  <li><strong>Frontend:</strong>
+    <ul>
+      <li><code>HTML</code> – Webpage structure</li>
+      <li><code>CSS</code> – Styling</li>
+      <li><code>JavaScript</code> – Interactivity</li>
+    </ul>
+  </li>
+  <li><strong>Backend:</strong>
+    <ul>
+      <li><code>PHP</code> – Server-side logic and algorithms</li>
+    </ul>
+  </li>
+  <li><strong>Database:</strong>
+    <ul>
+      <li><code>MySQL</code> – Data storage</li>
+    </ul>
+  </li>
+</ul>
 
-What It Can Do (Key Features)
-Easy Sign-Up and Login: You can create an account and log in easily.
-
-Separate Admin Login: Admins have their own special login page for better security.
-
-Your Personal Profile: You can update your details, like:
-
-Your school/university name and graduation year.
-
-Your major and GPA (grades).
-
-Lots of Skills: Choose from a big list of computer-related skills (like Python, Java, Cloud, AI, etc.). There's even a search bar to find skills quickly!
-
-Detailed Quiz: Answer questions about your ideal work environment, how you solve problems, what interests you, and your personality.
-
-Work Experience Summary: Write down your past job experiences.
-
-Projects Summary: Describe any projects you've worked on.
-
-Smart Job Suggestions:
-
-Top Career Paths: Get job ideas that are a good match for you, with a "Compatibility Score."
-
-Skills to Learn: It suggests new skills that would be helpful for jobs you're interested in.
-
-Success Prediction: Get a percentage score showing how well you might fit into different careers.
-
-Quick Resume Builder: Create a basic resume instantly using all the information from your profile. You can then print it or save it as a PDF.
-
-Admin Control Panel: If you're an admin, you can easily:
-
-Manage Careers: Add, change, or remove job titles and their descriptions.
-
-Manage Skills: Add, change, or remove skills available on the site.
-
-Manage Users: See all user accounts and safely delete them if needed.
-
-What It's Built With (Technologies)
-Frontend (What you see in your browser):
-
-HTML: For the structure of the web pages.
-
-CSS: For making the website look good (colors, fonts, layout).
-
-JavaScript: For interactive parts, like the skill search bar.
-
-Backend (What works behind the scenes):
-
-PHP: The programming language that handles user requests, talks to the database, and runs the smart algorithms.
-
-Database (Where all the information is stored):
-
-MySQL: A popular database system.
-
-Project Files (Structure)
-Here's how the project folders and files are organized:
-
+<h2>Project Files (Structure)</h2>
+<pre>
 CareerGuidanceSystem/
 ├── admin/                     # Files for the Admin Panel
 │   ├── dashboard.php          # Admin's main page
@@ -75,27 +75,27 @@ CareerGuidanceSystem/
 │   ├── association_rule_mining.php # Suggests new skills
 │   ├── career_scoring.php     # Calculates job compatibility scores
 │   └── linear_regression.php  # Predicts success percentages
-├── assets/                    # Design and interactive files
+├── assets/
 │   ├── css/
-│   │   └── style.css          # Main styles for the whole website
+│   │   └── style.css          # Main styles
 │   └── js/
-│       └── script.js          # (Currently not heavily used, but ready for more JavaScript)
-├── backend/                   # PHP files that process forms and data
-│   ├── process_admin_login.php # Handles admin login
-│   ├── process_login.php      # Handles regular user login
-│   └── process_registration.php # Handles new user sign-ups
-├── config/                    # Important settings
-│   └── config.php             # Database connection details
-├── user/                      # Files for regular users
-│   ├── dashboard.php          # User's main page
-│   ├── generate_resume.php    # Creates the resume
-│   ├── profile.php            # Page to update personal info, skills, and quiz answers
-│   └── recommendations.php    # Shows job recommendations
-├── admin_login.php            # Separate login page for Admins
-├── index.php                  # The main home page of the website
-├── login.php                  # Login page for regular users
-├── logout.php                 # Logs users out
-├── register.php               # Sign-up page for new users
-├── README.md                  # This document!
-└── database_schema.sql        # The blueprint for your database (tables and initial data)
-
+│       └── script.js          # JavaScript functionality
+├── backend/
+│   ├── process_admin_login.php
+│   ├── process_login.php
+│   └── process_registration.php
+├── config/
+│   └── config.php             # DB connection
+├── user/
+│   ├── dashboard.php
+│   ├── generate_resume.php
+│   ├── profile.php
+│   └── recommendations.php
+├── admin_login.php
+├── index.php
+├── login.php
+├── logout.php
+├── register.php
+├── README.md
+└── database_schema.sql
+</pre>
