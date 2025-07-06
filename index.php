@@ -34,7 +34,7 @@ if (isset($_SESSION['user_id'])) {
 
         .header {
             background-color: #007bff;
-            color: white;
+            color: white; /* This sets the default text color for the header */
             padding: 20px 0;
             text-align: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -44,6 +44,7 @@ if (isset($_SESSION['user_id'])) {
             margin: 0;
             font-size: 2.8em;
             letter-spacing: 1px;
+            color: white; /* Explicitly setting H1 color to white */
         }
 
         .header p {
@@ -152,9 +153,9 @@ if (isset($_SESSION['user_id'])) {
     <nav class="navbar">
         <ul>
             <li><a href="index.php">Home</a></li>
-            <li><a href="login.php">User Login</a></li> <!-- Changed text -->
+            <li><a href="login.php">User Login</a></li>
             <li><a href="register.php">Register</a></li>
-            <li><a href="admin_login.php">Admin Login</a></li> <!-- NEW LINK -->
+            <li><a href="admin_login.php">Admin Login</a></li>
         </ul>
     </nav>
 
@@ -194,3 +195,4 @@ if (isset($_SESSION['user_id'])) {
     </footer>
 </body>
 </html>
+
