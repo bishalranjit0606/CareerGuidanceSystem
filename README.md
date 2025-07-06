@@ -1,148 +1,342 @@
 Career Guidance System
-What This Project Does
-This is a website that helps people figure out what career might be a good fit for them. It asks you about your skills, what you like, and how you prefer to work, then suggests jobs and even helps you build a basic resume. It has two main types of users: regular people looking for career help, and administrators who manage the website's information.
+What This Project Is About
+This project is a website designed to help people find the best career path for them. It's like a smart guide that learns about you – your skills, what you like, and how you prefer to work – and then gives you personalized job suggestions. It can even help you create a basic resume!
 
-Main Things It Can Do
-Easy Sign-Up and Login: You can create an account and log in, whether you're a regular user or an admin.
+The website has two types of users:
 
-Separate Admin Login: Admins have their own special login page for extra security.
+Regular Users: People who want career advice.
 
-Your Personal Profile: You can fill in your school details (like your major and grades), pick all the computer skills you have, and answer a fun quiz about your interests. You can also write down your work experiences and projects.
+Administrators (Admins): People who manage the website's content, like adding new jobs or skills.
+
+What It Can Do (Key Features)
+Easy Sign-Up and Login: You can create an account and log in easily.
+
+Separate Admin Login: Admins have their own special login page for better security.
+
+Your Personal Profile: You can update your details, like:
+
+Your school/university name and graduation year.
+
+Your major and GPA (grades).
+
+Lots of Skills: Choose from a big list of computer-related skills (like Python, Java, Cloud, AI, etc.). There's even a search bar to find skills quickly!
+
+Detailed Quiz: Answer questions about your ideal work environment, how you solve problems, what interests you, and your personality.
+
+Work Experience Summary: Write down your past job experiences.
+
+Projects Summary: Describe any projects you've worked on.
 
 Smart Job Suggestions:
 
-It gives you job ideas that match your skills and quiz answers.
+Top Career Paths: Get job ideas that are a good match for you, with a "Compatibility Score."
 
-It suggests new skills you might want to learn to help you get certain jobs.
+Skills to Learn: It suggests new skills that would be helpful for jobs you're interested in.
 
-It even guesses how well you might do in different careers based on your info.
+Success Prediction: Get a percentage score showing how well you might fit into different careers.
 
-Quick Resume Builder: It can create a simple resume for you, using all the information you put in your profile. You can then print it or save it as a PDF.
+Quick Resume Builder: Create a basic resume instantly using all the information from your profile. You can then print it or save it as a PDF.
 
-Admin Control Panel: If you're an admin, you can easily add, change, or remove job titles and skills on the website. You can also see and manage all the user accounts.
+Admin Control Panel: If you're an admin, you can easily:
 
-What It's Built With
-Front-End (What you see): Standard web languages like HTML, CSS (for styling), and a bit of JavaScript (for things like searching skills).
+Manage Careers: Add, change, or remove job titles and their descriptions.
 
-Back-End (What makes it work): PHP (a popular web programming language).
+Manage Skills: Add, change, or remove skills available on the site.
 
-Database (Where information is stored): MySQL (a common database system).
+Manage Users: See all user accounts and safely delete them if needed.
 
-How to Get It Running on Your Computer (for Mac users with XAMPP)
-This project is set up to run on a Mac using a tool called XAMPP.
+What It's Built With (Technologies)
+Frontend (What you see in your browser):
 
-What You Need
-XAMPP for Mac: Download and install it from https://www.apachefriends.org/download.html. It helps your computer act like a web server.
+HTML: For the structure of the web pages.
 
-Mac Terminal: You'll use this to type in a few commands.
+CSS: For making the website look good (colors, fonts, layout).
 
-Steps to Install
-Put the Project Files in the Right Place:
+JavaScript: For interactive parts, like the skill search bar.
 
-Open your Terminal app.
+Backend (What works behind the scenes):
 
-Go to your XAMPP web folder:
+PHP: The programming language that handles user requests, talks to the database, and runs the smart algorithms.
 
-cd /Applications/XAMPP/xamppfiles/htdocs/
+Database (Where all the information is stored):
 
-Copy your entire CareerGuidanceSystem folder (the one with all the project files) into this htdocs folder.
+MySQL: A popular database system.
 
-Set Up the Database (IMPORTANT: Port 3307):
+Project Files (Structure)
+Here's how the project folders and files are organized:
 
-Open the XAMPP app on your Mac.
+CareerGuidanceSystem/
+├── admin/                     # Files for the Admin Panel
+│   ├── dashboard.php          # Admin's main page
+│   ├── manage_careers.php     # Add/Edit/Delete job careers
+│   ├── manage_skills.php      # Add/Edit/Delete skills
+│   └── manage_users.php       # View and delete user accounts
+├── algorithms/                # PHP files for the smart recommendation logic
+│   ├── association_rule_mining.php # Suggests new skills
+│   ├── career_scoring.php     # Calculates job compatibility scores
+│   └── linear_regression.php  # Predicts success percentages
+├── assets/                    # Design and interactive files
+│   ├── css/
+│   │   └── style.css          # Main styles for the whole website
+│   └── js/
+│       └── script.js          # (Currently not heavily used, but ready for more JavaScript)
+├── backend/                   # PHP files that process forms and data
+│   ├── process_admin_login.php # Handles admin login
+│   ├── process_login.php      # Handles regular user login
+│   └── process_registration.php # Handles new user sign-ups
+├── config/                    # Important settings
+│   └── config.php             # Database connection details
+├── user/                      # Files for regular users
+│   ├── dashboard.php          # User's main page
+│   ├── generate_resume.php    # Creates the resume
+│   ├── profile.php            # Page to update personal info, skills, and quiz answers
+│   └── recommendations.php    # Shows job recommendations
+├── admin_login.php            # Separate login page for Admins
+├── index.php                  # The main home page of the website
+├── login.php                  # Login page for regular users
+├── logout.php                 # Logs users out
+├── register.php               # Sign-up page for new users
+├── README.md                  # This document!
+└── database_schema.sql        # The blueprint for your database (tables and initial data)
 
-Go to "Manage Servers" and make sure Apache Web Server and MySQL Database are running.
+How to Get This Project Running on Your Computer (Step-by-Step Guide)
+This project uses XAMPP, which helps your computer act like a web server and run the database.
 
-Crucial Step for MySQL: This project uses MySQL on a special port (3307) instead of the usual one (3306).
+Prerequisites (What you need before you start)
+XAMPP: Download and install XAMPP for your operating system.
 
-Stop MySQL Database in XAMPP.
+Download link: https://www.apachefriends.org/download.html
 
-In XAMPP, go to the "Services" tab (or "Configure" for MySQL).
+Web Browser: Like Chrome, Firefox, Edge, etc.
 
-Find the my.cnf file (usually at /Applications/XAMPP/xamppfiles/etc/my.cnf).
+Text Editor: Like VS Code, Sublime Text, Notepad++, or even basic Notepad/TextEdit.
 
-Open my.cnf with a text editor (like TextEdit or VS Code).
+Git: (Optional, but good for managing code) If you plan to use Git commands, make sure it's installed.
 
-Look for port = 3306 (under the [mysqld] section) and change it to port = 3307.
+Installation Steps (Follow carefully for your operating system)
+For Windows Users:
+Install XAMPP:
 
-Save the file.
+Download the XAMPP installer for Windows from the link above.
 
-Start MySQL Database again in XAMPP.
+Run the installer. Follow the on-screen instructions. You can usually accept the default settings.
 
-Create the Database and Tables:
+Once installed, open the XAMPP Control Panel.
 
-Open your web browser and go to http://localhost/phpmyadmin/.
+Place Project Files:
+
+Find your XAMPP installation folder. By default, it's usually C:\xampp.
+
+Inside C:\xampp, there's a folder called htdocs. This is where your website files go.
+
+Copy your entire CareerGuidanceSystem project folder (the one containing all the files and folders listed above) into C:\xampp\htdocs.
+
+So, the path to your main index.php will be C:\xampp\htdocs\CareerGuidanceSystem\index.php.
+
+Configure MySQL Port (Crucial: 3307):
+
+In the XAMPP Control Panel, find the "MySQL" row.
+
+Click the "Config" button next to MySQL and select my.ini. This will open a text file.
+
+In the my.ini file, find the line that says port = 3306 (it's usually under a section like [mysqld]).
+
+Change port = 3306 to port = 3307.
+
+Save and close the my.ini file.
+
+Stop MySQL in the XAMPP Control Panel (if it's running), then Start it again for the change to take effect.
+
+Start Apache and MySQL:
+
+In the XAMPP Control Panel, click "Start" next to "Apache" and "MySQL".
+
+Their status should turn green.
+
+Create Database and Tables:
+
+Open your web browser and go to: http://localhost/phpmyadmin/
 
 On the left side, click "New".
 
-Type career_guidance_db as the database name and click "Create".
+In the "Database name" field, type career_guidance_db and click "Create".
 
-Now, click on career_guidance_db on the left side to select it.
+Now, on the left sidebar, click on the career_guidance_db database to select it.
 
 Click the "SQL" tab at the top.
 
-You need to get your database's blueprint (schema) and starting data.
+Import your project's database blueprint:
 
-In phpMyAdmin, with career_guidance_db selected, go to the "Export" tab.
+Find the database_schema.sql file in your CareerGuidanceSystem folder.
 
-Choose "Custom" export.
+Open this database_schema.sql file in a text editor (like Notepad++ or VS Code).
 
-Make sure all tables are selected.
+Copy all the content from database_schema.sql.
 
-Choose "Save output to a file" (SQL format).
+Paste it into the large text area under the "SQL" tab in phpMyAdmin.
 
-Make sure "Structure" (the table design) and "Data" (the info inside) are both checked.
+Click the "Go" button (usually at the bottom right) to run the commands. This will create all the necessary tables and fill them with initial data (like skills and careers).
 
-Click "Go". This will download a file.
+For macOS Users:
+Install XAMPP:
 
-Rename this downloaded file to database_schema.sql and put it in your main CareerGuidanceSystem/ folder.
+Download the XAMPP installer for macOS from the link above.
 
-Back in the "SQL" tab in phpMyAdmin, paste everything from your database_schema.sql file into the big text box.
+Run the .dmg file and drag the XAMPP application to your Applications folder.
 
-Click "Go" to run it. This will create all the tables and fill them with initial data.
+Open the XAMPP application from your Applications folder.
 
-How to Use the Website
-Make sure Apache and MySQL are running in your XAMPP app.
+Place Project Files:
+
+Open your Terminal app.
+
+Navigate to your XAMPP web folder:
+
+cd /Applications/XAMPP/xamppfiles/htdocs/
+
+Copy your entire CareerGuidanceSystem project folder (the one containing all the files and folders listed above) into this htdocs directory.
+
+So, the path to your main index.php will be /Applications/XAMPP/xamppfiles/htdocs/CareerGuidanceSystem/index.php.
+
+Configure MySQL Port (Crucial: 3307):
+
+Open the XAMPP application on your macOS.
+
+Go to the "Manage Servers" tab.
+
+Stop MySQL Database (if it's running).
+
+Go to the "Services" tab (or "Configure" for MySQL) in XAMPP.
+
+Find the my.cnf file (usually located at /Applications/XAMPP/xamppfiles/etc/my.cnf).
+
+Open my.cnf in a text editor (like TextEdit or VS Code).
+
+Find the line that says port = 3306 (it's usually under a section like [mysqld]).
+
+Change port = 3306 to port = 3307.
+
+Save and close the my.cnf file.
+
+Start MySQL Database again in XAMPP.
+
+Start Apache and MySQL:
+
+In the XAMPP application, go to "Manage Servers" and ensure both Apache Web Server and MySQL Database are running (their lights should be green).
+
+Create Database and Tables:
+
+Open your web browser and go to: http://localhost/phpmyadmin/
+
+On the left side, click "New".
+
+In the "Database name" field, type career_guidance_db and click "Create".
+
+Now, on the left sidebar, click on the career_guidance_db database to select it.
+
+Click the "SQL" tab at the top.
+
+Import your project's database blueprint:
+
+Find the database_schema.sql file in your CareerGuidanceSystem folder.
+
+Open this database_schema.sql file in a text editor (like VS Code or TextEdit).
+
+Copy all the content from database_schema.sql.
+
+Paste it into the large text area under the "SQL" tab in phpMyAdmin.
+
+Click the "Go" button (usually at the bottom right) to run the commands. This will create all the necessary tables and fill them with initial data (like skills and careers).
+
+Running the Application (After Setup)
+Make sure Apache and MySQL are running in your XAMPP Control Panel (Windows) or XAMPP application (macOS).
 
 Open your web browser and go to:
 
 http://localhost/CareerGuidanceSystem/
 
-First Time Using It?
-Sign Up as a Regular User: Click "Register" to make a new account for yourself.
+You should see the home page of the Career Guidance System!
 
-Become an Admin (if you want to manage things): After you sign up as a regular user, go to http://localhost/phpmyadmin/. Find your new user in the users table, click "Edit", and change their role from user to admin.
+How to Use the Website (First Time & Key Features)
+Initial Access:
+Public Home Page: Go to http://localhost/CareerGuidanceSystem/
 
-Log In: Use your new account to log in!
+User Registration: Click "Register" on the home page or go to http://localhost/CareerGuidanceSystem/register.php to create a new user account.
 
-What You Can Do (Quick Guide)
-Home Page: http://localhost/CareerGuidanceSystem/ (The main page everyone sees)
+User Login: Click "User Login" on the home page or go to http://localhost/CareerGuidanceSystem/login.php to log in as a regular user.
 
-Your User Account:
+Admin Login: Click "Admin Login" on the home page or go to http://localhost/CareerGuidanceSystem/admin_login.php to log in as an administrator.
 
-My Profile: Update your school info, pick your skills (use the search bar!), answer the quiz, and write about your work and projects.
+How to Create an Admin Account:
+First, Register a new regular user through the website (register.php).
 
-My Recommendations: See job ideas, skills to learn, and how well you might fit different careers.
+Then, open your web browser and go to http://localhost/phpmyadmin/.
 
-Generate Resume: Create your resume instantly!
+On the left sidebar, click on your database: career_guidance_db.
 
-Admin Account (Website Manager):
+Click on the users table.
 
-Manage Careers: Add or change job titles and their descriptions.
+Find the user you just registered. Click the "Edit" button (pencil icon) next to their row.
 
-Manage Skills: Add or change the list of skills available.
+Change the role field from user to admin.
 
-Manage Users: See all users and delete accounts if needed.
+Click "Go" to save the change. Now that user is an administrator!
 
-Ideas for Making It Even Better (Future Plans)
-Let admins add or change quiz questions.
+Using the User Dashboard:
+After logging in as a regular user, you'll be on your dashboard (user/dashboard.php).
 
-Add a fancy text editor for writing job descriptions or experience summaries.
+My Profile: Go to user/profile.php. This is the most important page for getting good recommendations.
 
-Make the resume builder even more detailed (add specific job entries, not just summaries).
+Fill in your academic details (University, Major, GPA, Graduation Year).
 
-Add charts or graphs to show data.
+Select your skills: Use the search bar to quickly find and check off all the computer-related skills you have.
 
-Let users give feedback on the job suggestions.
+Answer the quiz: Answer all the questions about your interests and work style.
 
+Summarize Experience & Projects: Write down your work experience and key projects in the provided text boxes.
 
+Click "Save Profile and Quiz Answers" when done.
+
+My Recommendations: Go to user/recommendations.php. Here you'll see:
+
+Top Career Paths: Jobs that are a good match for you, with a compatibility score.
+
+Skill Enhancement Suggestions: Ideas for new skills to learn.
+
+Potential Success Percentages: How well you might fit into different careers.
+
+Generate Resume: Go to user/generate_resume.php. This will show your personalized resume based on all the info you entered in your profile. You can use your browser's print function to save it as a PDF.
+
+Using the Admin Dashboard:
+After logging in as an administrator, you'll be on the admin dashboard (admin/dashboard.php).
+
+Manage Careers: Add new job titles, update their descriptions, or remove old ones.
+
+Manage Skills: Add new skills to the system, update existing skill names, or remove them.
+
+Manage Users: See a list of all registered users and delete their accounts (this will also remove all their associated data like skills and quiz answers).
+
+Ideas for Making It Even Better (Future Enhancements)
+If you want to expand this project further, here are some ideas:
+
+Admin can manage Quiz Questions: Let the admin add, edit, or delete the quiz questions themselves.
+
+Better Text Editors: Use a fancy text editor (like TinyMCE or CKEditor) for writing job descriptions or experience summaries, allowing bold text, bullet points, etc.
+
+More Advanced Job Matching: Explore more complex ways to match users to jobs, like using machine learning to learn from many users.
+
+Show Data with Charts: Add graphs or charts to the recommendations page or admin dashboard to visualize data.
+
+User Feedback: Let users rate how helpful the recommendations were.
+
+Password Reset: Add a "Forgot Password" feature.
+
+Job Posting Integration: Connect to real job websites to show actual job openings.
+
+Credits & Thanks
+Developed by: Bishal Ranjitkar
+
+Special Thanks: To anyone who helped or guided me during this project.
+
+License
+This project is open-source, which means you're free to use, share, and change the code.
