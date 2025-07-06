@@ -3,8 +3,9 @@
 session_start();
 require_once '../config/config.php';
 
+// Check if user is logged in and is an administrator
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header('Location: ../login.php');
+    header('Location: ../admin_login.php'); // Redirect to admin login if not authorized
     exit();
 }
 
@@ -18,17 +19,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $description = trim($_POST['description']);
 
         if (!empty($title) && !empty($description)) {
-            $sql = "INSERT INTO careers (title, description) VALUES (?, ?)";
-            if ($stmt = mysqli_prepare($conn, $sql)) {
-                mysqli_stmt_bind_param($stmt, "ss", $title, $description);
-                if (mysqli_stmt_execute($stmt)) {
-                    $message = "Career added successfully!";
-                    $message_type = "success";
-                } else {
-                    $message = "Error adding career: " . mysqli_error($conn);
+            // Check if career title already exists
+            $sql_check = "SELECT id FROM careers WHERE title = ?";
+            if ($stmt_check = mysqli_prepare($conn, $sql_check)) {
+                mysqli_stmt_bind_param($stmt_check, "s", $title);
+                mysqli_stmt_execute($stmt_check);
+                mysqli_stmt_store_result($stmt_check);
+                if (mysqli_stmt_num_rows($stmt_check) > 0) {
+                    $message = "A career with this title already exists.";
                     $message_type = "error";
+                } else {
+                    $sql = "INSERT INTO careers (title, description) VALUES (?, ?)";
+                    if ($stmt = mysqli_prepare($conn, $sql)) {
+                        mysqli_stmt_bind_param($stmt, "ss", $title, $description);
+                        if (mysqli_stmt_execute($stmt)) {
+                            $message = "Career added successfully!";
+                            $message_type = "success";
+                        } else {
+                            $message = "Error adding career: " . mysqli_error($conn);
+                            $message_type = "error";
+                        }
+                        mysqli_stmt_close($stmt);
+                    }
                 }
-                mysqli_stmt_close($stmt);
+                mysqli_stmt_close($stmt_check);
             }
         } else {
             $message = "Title and Description cannot be empty.";
@@ -40,17 +54,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $description = trim($_POST['description']);
 
         if (!empty($title) && !empty($description) && !empty($id)) {
-            $sql = "UPDATE careers SET title = ?, description = ? WHERE id = ?";
-            if ($stmt = mysqli_prepare($conn, $sql)) {
-                mysqli_stmt_bind_param($stmt, "ssi", $title, $description, $id);
-                if (mysqli_stmt_execute($stmt)) {
-                    $message = "Career updated successfully!";
-                    $message_type = "success";
-                } else {
-                    $message = "Error updating career: " . mysqli_error($conn);
+            // Check for duplicate title (excluding current career itself)
+            $sql_check = "SELECT id FROM careers WHERE title = ? AND id != ?";
+            if ($stmt_check = mysqli_prepare($conn, $sql_check)) {
+                mysqli_stmt_bind_param($stmt_check, "si", $title, $id);
+                mysqli_stmt_execute($stmt_check);
+                mysqli_stmt_store_result($stmt_check);
+                if (mysqli_stmt_num_rows($stmt_check) > 0) {
+                    $message = "Another career with this title already exists.";
                     $message_type = "error";
+                } else {
+                    $sql = "UPDATE careers SET title = ?, description = ? WHERE id = ?";
+                    if ($stmt = mysqli_prepare($conn, $sql)) {
+                        mysqli_stmt_bind_param($stmt, "ssi", $title, $description, $id);
+                        if (mysqli_stmt_execute($stmt)) {
+                            $message = "Career updated successfully!";
+                            $message_type = "success";
+                        } else {
+                            $message = "Error updating career: " . mysqli_error($conn);
+                            $message_type = "error";
+                        }
+                        mysqli_stmt_close($stmt);
+                    }
                 }
-                mysqli_stmt_close($stmt);
+                mysqli_stmt_close($stmt_check);
             }
         } else {
             $message = "All fields are required for update.";
@@ -69,7 +96,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 mysqli_stmt_close($stmt_check);
 
                 if ($count_recommendations > 0) {
-                    $message = "Cannot delete career. It is linked to " . $count_recommendations . " user recommendation(s). Please delete linked recommendations first (e.g., from phpMyAdmin for now, or implement user recommendation management).";
+                    $message = "Cannot delete career. It is linked to " . $count_recommendations . " user recommendation(s). You must delete these recommendations first (e.g., via phpMyAdmin, or by deleting the associated users).";
                     $message_type = "error";
                 } else {
                     $sql = "DELETE FROM careers WHERE id = ?";
@@ -85,6 +112,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         mysqli_stmt_close($stmt);
                     }
                 }
+            } else {
+                $message = "Failed to prepare check for recommendations: " . mysqli_error($conn);
+                $message_type = "error";
             }
         } else {
             $message = "Career ID not provided for deletion.";
@@ -101,6 +131,9 @@ if ($result_careers) {
     while ($row = mysqli_fetch_assoc($result_careers)) {
         $careers[] = $row;
     }
+} else {
+    $message = "Error fetching careers: " . mysqli_error($conn);
+    $message_type = "error";
 }
 
 mysqli_close($conn);
@@ -205,12 +238,13 @@ mysqli_close($conn);
                         <p><?php echo nl2br(htmlspecialchars($career['description'])); ?></p>
                         <div class="career-actions">
                             <button class="btn-action btn-update" onclick="toggleEditForm(<?php echo $career['id']; ?>, '<?php echo htmlspecialchars(addslashes($career['title'])); ?>', '<?php echo htmlspecialchars(addslashes($career['description'])); ?>')">Edit</button>
-                            <form action="manage_careers.php" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this career? This cannot be undone.');">
+                            <form action="manage_careers.php" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this career? This cannot be undone if linked to user recommendations.');">
                                 <input type="hidden" name="id" value="<?php echo $career['id']; ?>">
                                 <button type="submit" name="delete_career" class="btn-action btn-delete">Delete</button>
                             </form>
                         </div>
 
+                        <!-- Edit Form (hidden by default) -->
                         <div class="edit-form-container" id="edit-form-<?php echo $career['id']; ?>">
                             <h4>Edit Career</h4>
                             <form action="manage_careers.php" method="POST">
@@ -261,3 +295,4 @@ mysqli_close($conn);
     </script>
 </body>
 </html>
+

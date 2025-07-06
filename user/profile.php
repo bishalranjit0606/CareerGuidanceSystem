@@ -12,9 +12,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
 $user_id = $_SESSION['user_id'];
 $user_name = $_SESSION['user_name'];
 
-// Fetch existing user details
+// Fetch existing user details, including all new fields
 $user_details = [];
-$sql_user_details = "SELECT name, email FROM users WHERE id = ?";
+$sql_user_details = "SELECT name, email, major, gpa, experience_summary, projects_summary, phone_number, linkedin_url, summary_text, university_name, graduation_year FROM users WHERE id = ?";
 if ($stmt = mysqli_prepare($conn, $sql_user_details)) {
     mysqli_stmt_bind_param($stmt, "i", $user_id);
     mysqli_stmt_execute($stmt);
@@ -59,101 +59,223 @@ if ($stmt = mysqli_prepare($conn, $sql_user_answers)) {
     mysqli_stmt_close($stmt);
 }
 
-// Define quiz questions and options
-// This can be stored in the database for a more dynamic system,
-// but for a procedural approach, hardcoding is fine for initial setup.
+// Define quiz questions and options (as per previous version)
 $quiz_questions = [
+    // Section 1: Work Environment & Preferences
     [
-        'question' => 'What is your preferred work environment?',
+        'question' => 'What is your ideal work environment?',
         'type' => 'radio',
         'name' => 'work_environment',
         'options' => [
-            'Structured office setting with clear hierarchy',
-            'Flexible environment with autonomy and creativity',
-            'Collaborative team-based environment',
-            'Fast-paced, high-pressure environment'
+            'Structured office setting with clear hierarchy and processes',
+            'Flexible environment with autonomy, creativity, and less rigid structure',
+            'Highly collaborative team-based environment with constant interaction',
+            'Independent work, where I can focus deeply with minimal interruptions',
+            'Fast-paced, high-pressure environment with tight deadlines'
         ]
     ],
     [
-        'question' => 'Which of these activities do you enjoy most?',
+        'question' => 'How do you prefer to approach problem-solving?',
         'type' => 'radio',
-        'name' => 'enjoy_activity',
+        'name' => 'problem_solving_approach',
         'options' => [
-            'Solving complex logical puzzles',
-            'Creating visual designs or art',
-            'Helping and communicating with people',
-            'Organizing and managing projects'
+            'Systematically breaking down complex problems into smaller parts',
+            'Brainstorming creative and unconventional solutions',
+            'Collaborating with others to find a consensus solution',
+            'Experimenting and iterating quickly to find solutions'
         ]
     ],
     [
-        'question' => 'How do you prefer to learn new things?',
+        'question' => 'What kind of tasks do you find most engaging?',
+        'type' => 'checkbox',
+        'name' => 'engaging_tasks',
+        'options' => [
+            'Analyzing data and identifying patterns',
+            'Designing and creating visual interfaces or content',
+            'Writing and debugging code',
+            'Managing projects and coordinating teams',
+            'Interacting directly with clients or users',
+            'Researching new technologies and concepts',
+            'Securing systems and preventing attacks'
+        ]
+    ],
+    // Section 2: Learning & Growth
+    [
+        'question' => 'How do you prefer to learn new technologies or skills?',
         'type' => 'radio',
-        'name' => 'learn_preference',
+        'name' => 'learning_preference',
         'options' => [
-            'Hands-on practical experience',
-            'Reading books and articles',
-            'Attending lectures and workshops',
-            'Through mentorship and guidance'
+            'Hands-on coding/building projects',
+            'Reading documentation and academic papers',
+            'Watching video tutorials and online courses',
+            'Learning from mentors or experienced colleagues',
+            'Attending workshops and conferences'
         ]
     ],
     [
-        'question' => 'What kind of challenges motivate you?',
-        'type' => 'checkbox', // Example of checkbox
-        'name' => 'challenges_motivate',
+        'question' => 'How comfortable are you with continuous learning and adapting to new tools?',
+        'type' => 'radio',
+        'name' => 'continuous_learning',
         'options' => [
-            'Technical problems and debugging',
-            'Creative roadblocks and innovation',
-            'Interpersonal conflicts and team dynamics',
-            'Strategic planning and execution'
+            'Extremely comfortable, I thrive on new challenges',
+            'Comfortable, I enjoy learning new things regularly',
+            'Somewhat comfortable, I prefer stability but can adapt',
+            'Not very comfortable, I prefer mastering a few tools'
+        ]
+    ],
+    // Section 3: Interests & Aptitudes
+    [
+        'question' => 'Which of the following areas interests you most?',
+        'type' => 'checkbox',
+        'name' => 'interest_areas',
+        'options' => [
+            'Artificial Intelligence & Machine Learning',
+            'Cloud Computing & DevOps',
+            'Cybersecurity & Network Defense',
+            'Web & Mobile Application Development',
+            'Data Analysis & Business Intelligence',
+            'Game Development & Interactive Media',
+            'User Experience (UX) & Interface (UI) Design',
+            'Database Management & Optimization',
+            'Technical Writing & Documentation',
+            'System Administration & IT Support'
         ]
     ],
     [
-        'question' => 'Are you comfortable with repetitive tasks?',
+        'question' => 'Are you comfortable with abstract concepts and theoretical frameworks?',
+        'type' => 'radio',
+        'name' => 'abstract_concepts',
+        'options' => [
+            'Very comfortable, I enjoy theoretical exploration',
+            'Somewhat comfortable, I prefer practical applications',
+            'Not very comfortable, I prefer concrete tasks'
+        ]
+    ],
+    [
+        'question' => 'How much do you enjoy working with mathematical or statistical concepts?',
+        'type' => 'radio',
+        'name' => 'math_enjoyment',
+        'options' => [
+            'Highly enjoy, I seek out opportunities to use them',
+            'Moderately enjoy, I can apply them when needed',
+            'Neutral, I can do it but don\'t prefer it',
+            'Dislike, I prefer to avoid them'
+        ]
+    ],
+    // Section 4: Personality & Soft Skills
+    [
+        'question' => 'How would you describe your communication style?',
+        'type' => 'radio',
+        'name' => 'communication_style',
+        'options' => [
+            'Direct and assertive',
+            'Collaborative and consensus-driven',
+            'Detailed and precise',
+            'Empathetic and supportive'
+        ]
+    ],
+    [
+        'question' => 'Are you more of a detail-oriented person or a big-picture thinker?',
+        'type' => 'radio',
+        'name' => 'detail_vs_big_picture',
+        'options' => [
+            'Strongly detail-oriented',
+            'Mostly detail-oriented, but can see the big picture',
+            'Mostly big-picture thinker, but can handle details',
+            'Strongly big-picture thinker'
+        ]
+    ],
+    [
+        'question' => 'How do you handle repetitive tasks?',
         'type' => 'radio',
         'name' => 'repetitive_tasks',
         'options' => [
-            'Very comfortable, I like routine',
-            'Somewhat comfortable, if necessary',
-            'Not very comfortable, I prefer variety',
-            'Strongly dislike repetitive tasks'
+            'Very comfortable, I appreciate routine and consistency',
+            'Somewhat comfortable, if they are necessary for a larger goal',
+            'Not very comfortable, I prefer variety and new challenges',
+            'Strongly dislike repetitive tasks, I seek automation'
+        ]
+    ],
+    [
+        'question' => 'How important is innovation and creating new things to you?',
+        'type' => 'radio',
+        'name' => 'innovation_importance',
+        'options' => [
+            'Extremely important, I want to be at the forefront of creation',
+            'Very important, I enjoy contributing to new ideas',
+            'Moderately important, I can work on existing systems',
+            'Not very important, I prefer maintenance or established processes'
+        ]
+    ],
+    // Section 5: Career Values
+    [
+        'question' => 'What drives you most in a career?',
+        'type' => 'checkbox',
+        'name' => 'career_drivers',
+        'options' => [
+            'High salary and financial stability',
+            'Opportunities for continuous learning and growth',
+            'Making a significant impact or solving real-world problems',
+            'Work-life balance and flexibility',
+            'Recognition and career advancement',
+            'Working with cutting-edge technologies',
+            'Collaborative and supportive team culture'
         ]
     ]
-    // Add more quiz questions as needed
 ];
+
 
 // Handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // 1. Process Personal & Academic Details (Dummy for now, as DB schema doesn't have grade fields)
-    // For a real system, you'd add columns like `grade_level`, `gpa`, etc. to the `users` table
-    // For now, we'll just acknowledge these inputs.
+    // 1. Process Personal & Academic Details
+    $major = trim($_POST['major'] ?? '');
+    $gpa = $_POST['gpa'] ?? null;
+    $param_gpa = (empty($gpa) && $gpa !== 0.0 && $gpa !== '0') ? null : (float)$gpa;
+
+    // Process Experience and Projects Summaries
+    $experience_summary = trim($_POST['experience_summary'] ?? '');
+    $projects_summary = trim($_POST['projects_summary'] ?? '');
+
+    // New: Process Contact and Summary Details
+    $phone_number = trim($_POST['phone_number'] ?? '');
+    $linkedin_url = trim($_POST['linkedin_url'] ?? '');
+    $summary_text = trim($_POST['summary_text'] ?? '');
+    $university_name = trim($_POST['university_name'] ?? '');
+    $graduation_year = trim($_POST['graduation_year'] ?? '');
+
+
+    // Update users table with all profile fields
+    $sql_update_user_profile = "UPDATE users SET major = ?, gpa = ?, experience_summary = ?, projects_summary = ?, phone_number = ?, linkedin_url = ?, summary_text = ?, university_name = ?, graduation_year = ? WHERE id = ?";
+    if ($stmt = mysqli_prepare($conn, $sql_update_user_profile)) {
+        // 'sssssssssi' -> s=major, s=gpa, s=experience_summary, s=projects_summary, s=phone_number, s=linkedin_url, s=summary_text, s=university_name, s=graduation_year, i=user_id
+        mysqli_stmt_bind_param($stmt, "sssssssssi", $major, $param_gpa, $experience_summary, $projects_summary, $phone_number, $linkedin_url, $summary_text, $university_name, $graduation_year, $user_id);
+        if (!mysqli_stmt_execute($stmt)) {
+            error_log("Error updating user profile: " . mysqli_stmt_error($stmt));
+        }
+        mysqli_stmt_close($stmt);
+    } else {
+        error_log("Failed to prepare user profile update statement: " . mysqli_error($conn));
+    }
+
 
     // 2. Process Skills
+    // Remove existing skills for the user
+    $sql_delete_skills = "DELETE FROM user_skills WHERE user_id = ?";
+    if ($stmt = mysqli_prepare($conn, $sql_delete_skills)) {
+        mysqli_stmt_bind_param($stmt, "i", $user_id);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
+    }
+
+    // Insert new skills
     if (isset($_POST['skills']) && is_array($_POST['skills'])) {
         $selected_skill_ids = $_POST['skills'];
-
-        // Remove existing skills for the user
-        $sql_delete_skills = "DELETE FROM user_skills WHERE user_id = ?";
-        if ($stmt = mysqli_prepare($conn, $sql_delete_skills)) {
-            mysqli_stmt_bind_param($stmt, "i", $user_id);
-            mysqli_stmt_execute($stmt);
-            mysqli_stmt_close($stmt);
-        }
-
-        // Insert new skills
         $sql_insert_skill = "INSERT INTO user_skills (user_id, skill_id) VALUES (?, ?)";
         if ($stmt = mysqli_prepare($conn, $sql_insert_skill)) {
             foreach ($selected_skill_ids as $skill_id) {
                 mysqli_stmt_bind_param($stmt, "ii", $user_id, $skill_id);
                 mysqli_stmt_execute($stmt);
             }
-            mysqli_stmt_close($stmt);
-        }
-    } else {
-        // If no skills are selected, ensure user_skills are cleared
-        $sql_delete_skills = "DELETE FROM user_skills WHERE user_id = ?";
-        if ($stmt = mysqli_prepare($conn, $sql_delete_skills)) {
-            mysqli_stmt_bind_param($stmt, "i", $user_id);
-            mysqli_stmt_execute($stmt);
             mysqli_stmt_close($stmt);
         }
     }
@@ -179,7 +301,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 mysqli_stmt_execute($stmt);
             } elseif ($q['type'] == 'checkbox' && isset($_POST[$input_name]) && is_array($_POST[$input_name])) {
                 // For checkboxes, store answers as a comma-separated string
-                $answers_str = implode(", ", $_POST[$input_name]);
+                $answers_str = implode("||", $_POST[$input_name]); // Using || as delimiter for easier parsing
                 mysqli_stmt_bind_param($stmt, "iss", $user_id, $question_text, $answers_str);
                 mysqli_stmt_execute($stmt);
             }
@@ -219,11 +341,32 @@ mysqli_close($conn);
             border-radius: 4px;
             font-size: 16px;
         }
+        .skills-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .skills-header h3 {
+            margin: 0;
+            border-bottom: none; /* Remove border from H3 inside flex */
+            padding-bottom: 0;
+        }
+        .skill-search-bar {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+            width: 250px; /* Adjust width as needed */
+        }
         .skills-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
             gap: 10px;
             margin-top: 10px;
+            max-height: 400px; /* Limit height */
+            overflow-y: auto; /* Add scroll for many skills */
+            padding-right: 10px; /* Space for scrollbar */
         }
         .skills-grid label {
             display: flex;
@@ -287,7 +430,7 @@ mysqli_close($conn);
 
         <form action="profile.php" method="POST">
             <div class="form-section">
-                <h3>Personal & Academic Details</h3>
+                <h3>Personal & Contact Details</h3>
                 <div class="form-group">
                     <label for="name">Name:</label>
                     <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($user_details['name'] ?? ''); ?>" required readonly>
@@ -299,22 +442,53 @@ mysqli_close($conn);
                     <small>Email is from your registration and cannot be changed here.</small>
                 </div>
                 <div class="form-group">
-                    <label for="major">Major/Field of Study:</label>
-                    <input type="text" id="major" name="major" placeholder="e.g., Computer Science, Business" value="">
+                    <label for="phone_number">Phone Number:</label>
+                    <input type="text" id="phone_number" name="phone_number" placeholder="e.g., +1 (123) 456-7890" value="<?php echo htmlspecialchars($user_details['phone_number'] ?? ''); ?>">
                 </div>
                 <div class="form-group">
-                    <label for="gpa">GPA (on 4.0 scale):</label>
-                    <input type="number" id="gpa" name="gpa" step="0.01" min="0" max="4" placeholder="e.g., 3.5">
+                    <label for="linkedin_url">LinkedIn Profile URL:</label>
+                    <input type="text" id="linkedin_url" name="linkedin_url" placeholder="e.g., https://linkedin.com/in/yourprofile" value="<?php echo htmlspecialchars($user_details['linkedin_url'] ?? ''); ?>">
                 </div>
             </div>
 
             <div class="form-section">
-                <h3>Your Skills</h3>
+                <h3>Academic Details</h3>
+                <div class="form-group">
+                    <label for="university_name">University Name:</label>
+                    <input type="text" id="university_name" name="university_name" placeholder="e.g., XYZ University" value="<?php echo htmlspecialchars($user_details['university_name'] ?? ''); ?>">
+                </div>
+                <div class="form-group">
+                    <label for="major">Major/Field of Study:</label>
+                    <input type="text" id="major" name="major" placeholder="e.g., Computer Science, Business" value="<?php echo htmlspecialchars($user_details['major'] ?? ''); ?>">
+                </div>
+                <div class="form-group">
+                    <label for="gpa">GPA (on 4.0 scale):</label>
+                    <input type="number" id="gpa" name="gpa" step="0.01" min="0" max="4" placeholder="e.g., 3.5" value="<?php echo htmlspecialchars($user_details['gpa'] ?? ''); ?>">
+                </div>
+                <div class="form-group">
+                    <label for="graduation_year">Graduation Year:</label>
+                    <input type="text" id="graduation_year" name="graduation_year" placeholder="e.g., 2025 or Expected 2026" value="<?php echo htmlspecialchars($user_details['graduation_year'] ?? ''); ?>">
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Resume Summary/Objective</h3>
+                <div class="form-group">
+                    <label for="summary_text">Write a brief professional summary or objective:</label>
+                    <textarea id="summary_text" name="summary_text" rows="5" placeholder="e.g., Highly motivated software engineering student with a strong passion for full-stack development and a proven ability to learn new technologies quickly. Seeking a challenging internship to apply theoretical knowledge and contribute to innovative projects."><?php echo htmlspecialchars($user_details['summary_text'] ?? ''); ?></textarea>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="skills-header">
+                    <h3>Your Skills</h3>
+                    <input type="text" id="skillSearch" class="skill-search-bar" placeholder="Search skills...">
+                </div>
                 <p>Select all skills that apply to you:</p>
                 <div class="skills-grid">
                     <?php if (!empty($all_skills)): ?>
                         <?php foreach ($all_skills as $skill): ?>
-                            <label>
+                            <label class="skill-item-label">
                                 <input type="checkbox" name="skills[]" value="<?php echo $skill['id']; ?>"
                                     <?php echo in_array($skill['id'], $user_selected_skills_ids) ? 'checked' : ''; ?>>
                                 <?php echo htmlspecialchars($skill['name']); ?>
@@ -323,6 +497,22 @@ mysqli_close($conn);
                     <?php else: ?>
                         <p>No skills available. Please contact an admin.</p>
                     <?php endif; ?>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Work Experience Summary</h3>
+                <div class="form-group">
+                    <label for="experience_summary">Describe your work experience:</label>
+                    <textarea id="experience_summary" name="experience_summary" rows="8" placeholder="e.g., Developed web applications using PHP and MySQL. Managed a team of 3 junior developers. Implemented new features, reducing bug reports by 20%." ><?php echo htmlspecialchars($user_details['experience_summary'] ?? ''); ?></textarea>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Projects Summary</h3>
+                <div class="form-group">
+                    <label for="projects_summary">Describe your key projects:</label>
+                    <textarea id="projects_summary" name="projects_summary" rows="8" placeholder="e.g., Built a full-stack e-commerce platform using React and Node.js. Developed a machine learning model for sentiment analysis. Designed and implemented a secure network architecture." ><?php echo htmlspecialchars($user_details['projects_summary'] ?? ''); ?></textarea>
                 </div>
             </div>
 
@@ -343,7 +533,7 @@ mysqli_close($conn);
                                                echo ($prev_answer == $option) ? 'checked' : '';
                                            } elseif ($question_data['type'] == 'checkbox') {
                                                // Check if this option was part of previously selected checkbox answers
-                                               $prev_answers_array = explode(", ", $prev_answer);
+                                               $prev_answers_array = explode("||", $prev_answer); // Use || as delimiter
                                                echo in_array($option, $prev_answers_array) ? 'checked' : '';
                                            }
                                            ?>>
@@ -362,5 +552,29 @@ mysqli_close($conn);
             <p><a href="dashboard.php">Back to Dashboard</a></p>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const skillSearchInput = document.getElementById('skillSearch');
+            const skillsGrid = document.querySelector('.skills-grid');
+            const skillLabels = skillsGrid ? skillsGrid.querySelectorAll('.skill-item-label') : [];
+
+            if (skillSearchInput) {
+                skillSearchInput.addEventListener('keyup', function() {
+                    const searchTerm = skillSearchInput.value.toLowerCase();
+
+                    skillLabels.forEach(label => {
+                        const skillName = label.textContent.toLowerCase();
+                        if (skillName.includes(searchTerm)) {
+                            label.style.display = 'flex'; // Show the label
+                        } else {
+                            label.style.display = 'none'; // Hide the label
+                        }
+                    });
+                });
+            }
+        });
+    </script>
 </body>
 </html>
+

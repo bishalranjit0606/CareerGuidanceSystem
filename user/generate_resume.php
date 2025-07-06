@@ -11,16 +11,27 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
 
 $user_id = $_SESSION['user_id'];
 
-// Fetch user's basic details
+// Fetch user's basic details including all new fields for resume
 $user_details = [];
-$sql_user_details = "SELECT name, email FROM users WHERE id = ?";
+$sql_user_details = "SELECT name, email, major, gpa, experience_summary, projects_summary, phone_number, linkedin_url, summary_text, university_name, graduation_year FROM users WHERE id = ?";
 if ($stmt = mysqli_prepare($conn, $sql_user_details)) {
     mysqli_stmt_bind_param($stmt, "i", $user_id);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
     $user_details = mysqli_fetch_assoc($result);
     mysqli_stmt_close($stmt);
+} else {
+    // Log error if statement preparation fails
+    error_log("Failed to prepare user details fetch statement for resume: " . mysqli_error($conn));
+    // Provide default empty values to prevent errors on page load
+    $user_details = [
+        'name' => '', 'email' => '', 'major' => '', 'gpa' => '',
+        'experience_summary' => '', 'projects_summary' => '',
+        'phone_number' => '', 'linkedin_url' => '', 'summary_text' => '',
+        'university_name' => '', 'graduation_year' => ''
+    ];
 }
+
 
 // Fetch user's selected skills
 $user_skills = [];
@@ -33,20 +44,21 @@ if ($stmt = mysqli_prepare($conn, $sql_user_skills)) {
         $user_skills[] = $row['name'];
     }
     mysqli_stmt_close($stmt);
+} else {
+    error_log("Failed to prepare user skills fetch statement for resume: " . mysqli_error($conn));
 }
 
-// You might also want to fetch academic details (major, GPA) if you've added them to the 'users' table
-// Example (uncomment if you added 'major' and 'gpa' columns):
-// $sql_academic_details = "SELECT major, gpa FROM users WHERE id = ?";
-// if ($stmt = mysqli_prepare($conn, $sql_academic_details)) {
-//     mysqli_stmt_bind_param($stmt, "i", $user_id);
-//     mysqli_stmt_execute($stmt);
-//     $result = mysqli_stmt_get_result($stmt);
-//     $academic_details = mysqli_fetch_assoc($result);
-//     mysqli_stmt_close($stmt);
-// }
-// $user_major = $academic_details['major'] ?? 'Not specified';
-// $user_gpa = $academic_details['gpa'] ?? 'Not specified';
+
+// Assign fetched data to variables, with default placeholders if empty or not set
+$user_major = htmlspecialchars($user_details['major'] ?? 'Not specified');
+$user_gpa = htmlspecialchars($user_details['gpa'] ?? 'Not specified');
+$experience_summary = htmlspecialchars($user_details['experience_summary'] ?? '');
+$projects_summary = htmlspecialchars($user_details['projects_summary'] ?? '');
+$phone_number = htmlspecialchars($user_details['phone_number'] ?? '');
+$linkedin_url = htmlspecialchars($user_details['linkedin_url'] ?? '');
+$summary_text = htmlspecialchars($user_details['summary_text'] ?? '');
+$university_name = htmlspecialchars($user_details['university_name'] ?? 'Your University Name');
+$graduation_year = htmlspecialchars($user_details['graduation_year'] ?? '[Graduation Year]');
 
 mysqli_close($conn);
 ?>
@@ -159,6 +171,9 @@ mysqli_close($conn);
         .print-button button:hover {
             background-color: #218838;
         }
+        .summary-text {
+            white-space: pre-wrap; /* Preserves whitespace and line breaks */
+        }
         @media print {
             .back-link, .print-button, .sidebar, .navbar {
                 display: none; /* Hide navigation and buttons when printing */
@@ -181,30 +196,53 @@ mysqli_close($conn);
     <div class="resume-container">
         <div class="resume-header">
             <h1><?php echo htmlspecialchars($user_details['name'] ?? 'Your Name'); ?></h1>
-            <p><?php echo htmlspecialchars($user_details['email'] ?? 'your.email@example.com'); ?></p>
-            <p>123-456-7890 | LinkedIn.com/in/yourprofile</p>
+            <p>
+                <?php echo htmlspecialchars($user_details['email'] ?? 'your.email@example.com'); ?>
+                <?php if (!empty($phone_number)): ?>
+                    | <?php echo $phone_number; ?>
+                <?php endif; ?>
+                <?php if (!empty($linkedin_url)): ?>
+                    | <a href="<?php echo $linkedin_url; ?>" target="_blank"><?php echo $linkedin_url; ?></a>
+                <?php endif; ?>
+            </p>
         </div>
 
         <div class="resume-section">
             <h2>Summary</h2>
-            <p>
-                A dedicated and enthusiastic individual with a passion for [mention relevant field, e.g., web development/data analysis]. Possessing a strong foundation in [mention 2-3 key skills] and eager to apply learned knowledge to real-world challenges. Highly motivated to learn and grow in a dynamic professional environment.
-                </p>
+            <?php if (!empty($summary_text)): ?>
+                <p class="summary-text"><?php echo nl2br($summary_text); ?></p>
+            <?php else: ?>
+                <p>A dedicated and enthusiastic individual with a passion for [mention relevant field, e.g., web development/data analysis]. Possessing a strong foundation in [mention 2-3 key skills] and eager to apply learned knowledge to real-world challenges. Highly motivated to learn and grow in a dynamic professional environment.</p>
+            <?php endif; ?>
         </div>
 
-        <?php
-        // Uncomment and adapt if you added major and gpa to your users table
-        /*
         <div class="resume-section">
             <h2>Education</h2>
             <ul>
-                <li><strong>[Your University Name]</strong> - [Your Degree], [Major]</li>
-                <li>GPA: <?php echo htmlspecialchars($user_gpa); ?> (on 4.0 scale)</li>
-                <li>[Graduation Year]</li>
+                <?php
+                // Check if any education detail is provided before showing the section
+                if (!empty($university_name) && $university_name !== 'Your University Name' ||
+                    !empty($user_major) && $user_major !== 'Not specified' ||
+                    (!empty($user_gpa) && $user_gpa !== 'Not specified' && $user_gpa !== '') ||
+                    !empty($graduation_year) && $graduation_year !== '[Graduation Year]') :
+                ?>
+                    <li>
+                        <strong><?php echo $university_name; ?></strong>
+                        <?php if (!empty($user_major) && $user_major !== 'Not specified'): ?>
+                            - <?php echo $user_major; ?>
+                        <?php endif; ?>
+                    </li>
+                    <?php if (!empty($user_gpa) && $user_gpa !== 'Not specified' && $user_gpa !== ''): ?>
+                        <li>GPA: <?php echo $user_gpa; ?> (on 4.0 scale)</li>
+                    <?php endif; ?>
+                    <?php if (!empty($graduation_year) && $graduation_year !== '[Graduation Year]'): ?>
+                        <li><?php echo $graduation_year; ?></li>
+                    <?php endif; ?>
+                <?php else: ?>
+                    <li>No education details added yet. Please update your profile.</li>
+                <?php endif; ?>
             </ul>
         </div>
-        */
-        ?>
 
         <div class="resume-section">
             <h2>Skills</h2>
@@ -221,27 +259,20 @@ mysqli_close($conn);
 
         <div class="resume-section">
             <h2>Experience</h2>
-            <ul>
-                <li><strong>[Job Title]</strong> | [Company Name] | [City, State] | [Start Date] – [End Date]</li>
-                <li>Description of responsibilities and achievements (e.g., Developed, Managed, Analyzed, Implemented).</li>
-                <li>Description of responsibilities and achievements.</li>
-            </ul>
-            <ul>
-                <li><strong>[Job Title]</strong> | [Company Name] | [City, State] | [Start Date] – [End Date]</li>
-                <li>Description of responsibilities and achievements.</li>
-            </ul>
+            <?php if (!empty($experience_summary)): ?>
+                <p class="summary-text"><?php echo nl2br($experience_summary); ?></p>
+            <?php else: ?>
+                <p>No experience details added yet. Please update your profile.</p>
+            <?php endif; ?>
         </div>
 
         <div class="resume-section">
             <h2>Projects</h2>
-            <ul>
-                <li><strong>[Project Name]</strong> | [Technologies Used]</li>
-                <li>Brief description of the project and your role/contributions.</li>
-            </ul>
-            <ul>
-                <li><strong>[Project Name]</strong> | [Technologies Used]</li>
-                <li>Brief description of the project and your role/contributions.</li>
-            </ul>
+            <?php if (!empty($projects_summary)): ?>
+                <p class="summary-text"><?php echo nl2br($projects_summary); ?></p>
+            <?php else: ?>
+                <p>No project details added yet. Please update your profile.</p>
+            <?php endif; ?>
         </div>
 
         <div class="print-button">
@@ -254,3 +285,4 @@ mysqli_close($conn);
     </div>
 </body>
 </html>
+

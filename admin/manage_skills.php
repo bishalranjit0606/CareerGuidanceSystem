@@ -3,8 +3,9 @@
 session_start();
 require_once '../config/config.php';
 
+// Check if user is logged in and is an administrator
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header('Location: ../login.php');
+    header('Location: ../admin_login.php'); // Redirect to admin login if not authorized
     exit();
 }
 
@@ -38,9 +39,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             $message_type = "error";
                         }
                         mysqli_stmt_close($stmt);
+                    } else {
+                        $message = "Failed to prepare add skill statement: " . mysqli_error($conn);
+                        $message_type = "error";
                     }
                 }
                 mysqli_stmt_close($stmt_check);
+            } else {
+                $message = "Failed to prepare skill existence check: " . mysqli_error($conn);
+                $message_type = "error";
             }
         } else {
             $message = "Skill Name cannot be empty.";
@@ -72,9 +79,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             $message_type = "error";
                         }
                         mysqli_stmt_close($stmt);
+                    } else {
+                        $message = "Failed to prepare update skill statement: " . mysqli_error($conn);
+                        $message_type = "error";
                     }
                 }
                 mysqli_stmt_close($stmt_check);
+            } else {
+                $message = "Failed to prepare skill existence check for update: " . mysqli_error($conn);
+                $message_type = "error";
             }
         } else {
             $message = "Skill Name is required for update.";
@@ -93,7 +106,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 mysqli_stmt_close($stmt_check);
 
                 if ($count_user_skills > 0) {
-                    $message = "Cannot delete skill. It is linked to " . $count_user_skills . " user(s). Please delete linked user skills first (e.g., from phpMyAdmin for now, or implement user skill management).";
+                    $message = "Cannot delete skill. It is linked to " . $count_user_skills . " user(s). You must delete these user skills first (e.g., via phpMyAdmin, or by deleting the associated users).";
                     $message_type = "error";
                 } else {
                     $sql = "DELETE FROM skills WHERE id = ?";
@@ -107,8 +120,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             $message_type = "error";
                         }
                         mysqli_stmt_close($stmt);
+                    } else {
+                        $message = "Failed to prepare delete skill statement: " . mysqli_error($conn);
+                        $message_type = "error";
                     }
                 }
+            } else {
+                $message = "Failed to prepare check for user skills: " . mysqli_error($conn);
+                $message_type = "error";
             }
         } else {
             $message = "Skill ID not provided for deletion.";
@@ -125,6 +144,9 @@ if ($result_skills) {
     while ($row = mysqli_fetch_assoc($result_skills)) {
         $skills[] = $row;
     }
+} else {
+    $message = "Error fetching skills: " . mysqli_error($conn);
+    $message_type = "error";
 }
 
 mysqli_close($conn);
@@ -229,6 +251,7 @@ mysqli_close($conn);
                             </form>
                         </div>
 
+                        <!-- Edit Form (hidden by default) -->
                         <div class="edit-form-container" id="edit-form-<?php echo $skill['id']; ?>">
                             <h4>Edit Skill</h4>
                             <form action="manage_skills.php" method="POST">
@@ -274,3 +297,4 @@ mysqli_close($conn);
     </script>
 </body>
 </html>
+

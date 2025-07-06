@@ -4,9 +4,9 @@ session_start(); // Start the session at the very beginning of the script
 require_once '../config/config.php'; // Include your database configuration file
 
 // Check if user is logged in and is an administrator
-// If not logged in or if the role is not 'admin', redirect to the login page
+// If not logged in or if the role is not 'admin', redirect to the admin login page
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header('Location: ../login.php');
+    header('Location: ../admin_login.php'); // Redirect to the new separate admin login page
     exit(); // Always exit after a header redirect
 }
 

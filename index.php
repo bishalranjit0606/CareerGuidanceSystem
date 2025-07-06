@@ -1,6 +1,6 @@
 <?php
-// index.php
-session_start(); // Start the session
+// index.php (UPDATED)
+session_start();
 
 // Check if user is already logged in and redirect to their respective dashboard
 if (isset($_SESSION['user_id'])) {
@@ -152,9 +152,10 @@ if (isset($_SESSION['user_id'])) {
     <nav class="navbar">
         <ul>
             <li><a href="index.php">Home</a></li>
-            <li><a href="login.php">Login</a></li>
+            <li><a href="login.php">User Login</a></li> <!-- Changed text -->
             <li><a href="register.php">Register</a></li>
-            </ul>
+            <li><a href="admin_login.php">Admin Login</a></li> <!-- NEW LINK -->
+        </ul>
     </nav>
 
     <main class="main-content">

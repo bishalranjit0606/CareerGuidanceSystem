@@ -42,6 +42,22 @@ if ($stmt = mysqli_prepare($conn, $sql_user_answers)) {
     mysqli_stmt_close($stmt);
 }
 
+// Fetch user's major and GPA
+$user_major = null;
+$user_gpa = null;
+$sql_user_academic = "SELECT major, gpa FROM users WHERE id = ?";
+if ($stmt = mysqli_prepare($conn, $sql_user_academic)) {
+    mysqli_stmt_bind_param($stmt, "i", $user_id);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_bind_result($stmt, $fetched_major, $fetched_gpa);
+    if (mysqli_stmt_fetch($stmt)) {
+        $user_major = $fetched_major;
+        $user_gpa = $fetched_gpa;
+    }
+    mysqli_stmt_close($stmt);
+}
+
+
 // Fetch all available skills (needed for skill suggestions and scoring)
 $all_skills = [];
 $sql_all_skills = "SELECT id, name FROM skills";
@@ -69,7 +85,7 @@ $skill_suggestions = [];
 $success_predictions = []; // Associative array: career_title => score (from linear_regression)
 
 // Only run algorithms if user has provided data (skills or answers)
-if (!empty($user_skills_ids) || !empty($user_answers)) {
+if (!empty($user_skills_ids) || !empty($user_answers) || $user_gpa !== null) {
     // Primary Career Recommendations (Scoring-based)
     $career_compatibility_scores = getCareerCompatibilityScores($user_skills_ids, $user_answers, $all_careers, $all_skills);
 
@@ -78,7 +94,7 @@ if (!empty($user_skills_ids) || !empty($user_answers)) {
 
     // Linear Regression: Predict Success Percentage for ALL careers
     foreach ($all_careers as $career) {
-        $score = predictSuccessScore($user_skills_ids, $user_answers, $career, $all_skills);
+        $score = predictSuccessScore($user_skills_ids, $user_answers, $career, $all_skills, $user_gpa); // Pass GPA
         $success_predictions[$career['title']] = $score;
     }
 
@@ -98,8 +114,9 @@ if (!empty($user_skills_ids) || !empty($user_answers)) {
     $sql_insert_recommendation = "INSERT INTO recommendations (user_id, career_id, success_score) VALUES (?, ?, ?)";
     if ($stmt = mysqli_prepare($conn, $sql_insert_recommendation)) {
         foreach ($career_compatibility_scores as $career_title => $score) {
-            // Only store if score is meaningful (e.g., above base score)
-            if ($score > 10) { // Adjust threshold as needed
+            // Only store if score is meaningful (e.g., above base score from career_scoring.php)
+            // The base score in career_scoring.php is 20, so let's use a threshold like 25
+            if ($score > 25) { // Adjust threshold as needed
                 $career_id_to_store = null;
                 foreach ($all_careers as $c) {
                     if ($c['title'] == $career_title) {
@@ -108,8 +125,8 @@ if (!empty($user_skills_ids) || !empty($user_answers)) {
                     }
                 }
                 if ($career_id_to_store !== null) {
-                    // Use the linear regression score if available, otherwise use the compatibility score directly
-                    $score_to_store = $success_predictions[$career_title] ?? $score;
+                    // Use the linear regression score for the success_score column in DB
+                    $score_to_store = $success_predictions[$career_title] ?? $score; // Fallback to compatibility score
                     mysqli_stmt_bind_param($stmt, "iid", $user_id, $career_id_to_store, $score_to_store);
                     mysqli_stmt_execute($stmt);
                 }
@@ -119,7 +136,7 @@ if (!empty($user_skills_ids) || !empty($user_answers)) {
     }
 
 } else {
-    $_SESSION['recommendation_message'] = "Please fill out your profile and quiz to get recommendations.";
+    $_SESSION['recommendation_message'] = "Please fill out your profile, skills, and quiz to get recommendations.";
 }
 
 mysqli_close($conn);
@@ -162,12 +179,12 @@ mysqli_close($conn);
                     $num_displayed_recommendations = 5; // Display top 5 careers
                     $displayed_count = 0;
                     foreach ($career_compatibility_scores as $career_title => $score):
-                        if ($displayed_count >= $num_displayed_recommendations) break;
                         // Only display if the score is above a certain minimum (e.g., base score + some points)
-                        if ($score > 10) : // Adjust this threshold as needed
+                        // This filters out careers with very low relevance.
+                        if ($score > 25 && $displayed_count < $num_displayed_recommendations) : // Adjust this threshold as needed
                             ?>
                             <div class="list-item">
-                                <strong><?php echo htmlspecialchars($career_title); ?></strong>
+                                <span><strong><?php echo htmlspecialchars($career_title); ?></strong></span>
                                 <span class="score">Compatibility Score: <?php echo htmlspecialchars($score); ?></span>
                             </div>
                             <?php
@@ -176,7 +193,7 @@ mysqli_close($conn);
                     endforeach;
                     if ($displayed_count == 0) :
                     ?>
-                        <p class="no-data-message">No significant career recommendations found based on your current inputs. Try updating your profile and quiz answers.</p>
+                        <p class="no-data-message">No significant career recommendations found based on your current inputs. Try updating your profile and quiz answers for more matches.</p>
                     <?php endif; ?>
                 <?php else: ?>
                     <p class="no-data-message">No career compatibility scores available. Please ensure your profile and quiz answers are complete.</p>
