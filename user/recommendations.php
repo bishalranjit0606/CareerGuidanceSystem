@@ -1,12 +1,12 @@
 <?php
-// user/recommendations.php
 session_start();
 require_once '../config/config.php';
-require_once '../algorithms/career_scoring.php'; // New file for primary recommendations
+require_once '../algorithms/career_scoring.php';
 require_once '../algorithms/association_rule_mining.php';
 require_once '../algorithms/linear_regression.php';
+require_once '../algorithms/course_recommendation.php';
 
-// Check if user is logged in and is a regular user
+// --- Auth check ---
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
     header('Location: ../login.php');
     exit();
@@ -14,9 +14,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
 
 $user_id = $_SESSION['user_id'];
 
-// --- 1. Fetch User Data ---
-
-// Fetch user's selected skills
+// --- Fetch Data ---
 $user_skills_ids = [];
 $sql_user_skills = "SELECT skill_id FROM user_skills WHERE user_id = ?";
 if ($stmt = mysqli_prepare($conn, $sql_user_skills)) {
@@ -29,7 +27,6 @@ if ($stmt = mysqli_prepare($conn, $sql_user_skills)) {
     mysqli_stmt_close($stmt);
 }
 
-// Fetch user's quiz answers
 $user_answers = [];
 $sql_user_answers = "SELECT question, answer FROM user_answers WHERE user_id = ?";
 if ($stmt = mysqli_prepare($conn, $sql_user_answers)) {
@@ -42,7 +39,6 @@ if ($stmt = mysqli_prepare($conn, $sql_user_answers)) {
     mysqli_stmt_close($stmt);
 }
 
-// Fetch user's major and GPA
 $user_major = null;
 $user_gpa = null;
 $sql_user_academic = "SELECT major, gpa FROM users WHERE id = ?";
@@ -57,52 +53,51 @@ if ($stmt = mysqli_prepare($conn, $sql_user_academic)) {
     mysqli_stmt_close($stmt);
 }
 
-
-// Fetch all available skills (needed for skill suggestions and scoring)
+// --- Fetch Skills and Careers ---
 $all_skills = [];
-$sql_all_skills = "SELECT id, name FROM skills";
-$result_all_skills = mysqli_query($conn, $sql_all_skills);
-if ($result_all_skills) {
-    while ($row = mysqli_fetch_assoc($result_all_skills)) {
-        $all_skills[] = $row;
-    }
+$result_all_skills = mysqli_query($conn, "SELECT id, name FROM skills");
+while ($row = mysqli_fetch_assoc($result_all_skills)) {
+    $all_skills[] = $row;
 }
 
-// Fetch all available careers (needed for rule-based and scoring)
 $all_careers = [];
-$sql_all_careers = "SELECT id, title, description FROM careers";
-$result_all_careers = mysqli_query($conn, $sql_all_careers);
-if ($result_all_careers) {
-    while ($row = mysqli_fetch_assoc($result_all_careers)) {
-        $all_careers[] = $row;
-    }
+$result_all_careers = mysqli_query($conn, "SELECT id, title, description FROM careers");
+while ($row = mysqli_fetch_assoc($result_all_careers)) {
+    $all_careers[] = $row;
 }
 
-// --- 2. Generate Recommendations using Algorithms ---
-
-$career_compatibility_scores = []; // New primary recommendations
+// --- Run Algorithms ---
+$career_compatibility_scores = [];
 $skill_suggestions = [];
-$success_predictions = []; // Associative array: career_title => score (from linear_regression)
+$success_predictions = [];
+$recommended_courses = [];
 
-// Only run algorithms if user has provided data (skills or answers)
 if (!empty($user_skills_ids) || !empty($user_answers) || $user_gpa !== null) {
-    // Primary Career Recommendations (Scoring-based)
     $career_compatibility_scores = getCareerCompatibilityScores($user_skills_ids, $user_answers, $all_careers, $all_skills);
-
-    // Association Rule Mining: Skill Enhancement Suggestions
     $skill_suggestions = getAssociationSkillSuggestions($user_skills_ids, $all_skills);
 
-    // Linear Regression: Predict Success Percentage for ALL careers
     foreach ($all_careers as $career) {
-        $score = predictSuccessScore($user_skills_ids, $user_answers, $career, $all_skills, $user_gpa); // Pass GPA
+        $score = predictSuccessScore($user_skills_ids, $user_answers, $career, $all_skills, $user_gpa);
         $success_predictions[$career['title']] = $score;
     }
 
-    // --- Optional: Store top compatibility careers in 'recommendations' table ---
-    // You might want to store only the top N most compatible careers,
-    // or all careers with a score above a certain threshold.
-    // For now, let's store careers that have a score > 0 and are somewhat significant.
-    // Clear previous recommendations for this user
+    // Convert skill_suggestions (names) to skill_ids
+    $suggested_skill_ids = [];
+    foreach ($skill_suggestions as $name) {
+        foreach ($all_skills as $skill) {
+            if (strtolower($skill['name']) === strtolower($name)) {
+                $suggested_skill_ids[] = $skill['id'];
+                break;
+            }
+        }
+    }
+
+    // Get Course Recommendations
+    if (!empty($suggested_skill_ids)) {
+        $recommended_courses = getCourseRecommendations($conn, $suggested_skill_ids);
+    }
+
+    // Store recommended careers in DB
     $sql_delete_recommendations = "DELETE FROM recommendations WHERE user_id = ?";
     if ($stmt = mysqli_prepare($conn, $sql_delete_recommendations)) {
         mysqli_stmt_bind_param($stmt, "i", $user_id);
@@ -110,25 +105,18 @@ if (!empty($user_skills_ids) || !empty($user_answers) || $user_gpa !== null) {
         mysqli_stmt_close($stmt);
     }
 
-    // Insert new recommendations based on compatibility scores
-    $sql_insert_recommendation = "INSERT INTO recommendations (user_id, career_id, success_score) VALUES (?, ?, ?)";
-    if ($stmt = mysqli_prepare($conn, $sql_insert_recommendation)) {
+    $sql_insert = "INSERT INTO recommendations (user_id, career_id, success_score) VALUES (?, ?, ?)";
+    if ($stmt = mysqli_prepare($conn, $sql_insert)) {
         foreach ($career_compatibility_scores as $career_title => $score) {
-            // Only store if score is meaningful (e.g., above base score from career_scoring.php)
-            // The base score in career_scoring.php is 20, so let's use a threshold like 25
-            if ($score > 25) { // Adjust threshold as needed
-                $career_id_to_store = null;
+            if ($score > 25) {
                 foreach ($all_careers as $c) {
-                    if ($c['title'] == $career_title) {
-                        $career_id_to_store = $c['id'];
+                    if ($c['title'] === $career_title) {
+                        $career_id = $c['id'];
+                        $store_score = $success_predictions[$career_title] ?? $score;
+                        mysqli_stmt_bind_param($stmt, "iid", $user_id, $career_id, $store_score);
+                        mysqli_stmt_execute($stmt);
                         break;
                     }
-                }
-                if ($career_id_to_store !== null) {
-                    // Use the linear regression score for the success_score column in DB
-                    $score_to_store = $success_predictions[$career_title] ?? $score; // Fallback to compatibility score
-                    mysqli_stmt_bind_param($stmt, "iid", $user_id, $career_id_to_store, $score_to_store);
-                    mysqli_stmt_execute($stmt);
                 }
             }
         }
@@ -146,61 +134,155 @@ mysqli_close($conn);
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Recommendations - User Dashboard</title>
+    <title>My Recommendations</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <style>
-        .recommendations-container { max-width: 900px; margin: 50px auto; padding: 30px; background-color: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .recommendations-container h1 { color: #0056b3; margin-bottom: 20px; text-align: center; }
-        .recommendation-section { margin-bottom: 30px; padding: 20px; border: 1px solid #eee; border-radius: 5px; }
-        .recommendation-section h3 { margin-top: 0; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 20px;}
-        .list-item { background-color: #f9f9f9; padding: 10px 15px; border-radius: 4px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;}
-        .list-item strong { color: #007bff; }
-        .score { font-weight: bold; color: #28a745; }
-        .no-data-message { color: #888; text-align: center; font-style: italic; margin-top: 20px; }
-        .back-link { display: block; text-align: center; margin-top: 20px; }
-        .back-link a { color: #007bff; text-decoration: none; }
-        .back-link a:hover { text-decoration: underline; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .page-layout {
+            display: flex;
+            max-width: 1200px;
+            margin: 40px auto;
+            gap: 30px;
+        }
+
+        .left-content {
+            flex: 2;
+        }
+
+        .right-sidebar {
+            flex: 1;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+
+        .right-sidebar h3 {
+            color: #007bff;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .recommendations-container h1 {
+            text-align: center;
+            color: #0056b3;
+        }
+
+        .recommendation-section {
+            background: #fff;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .recommendation-section h3 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .list-item {
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .score {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .course-item {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: #f9fbff;
+            border-left: 5px solid #007bff;
+            border-radius: 8px;
+        }
+
+        .course-item strong {
+            font-size: 1.1em;
+        }
+
+        .course-item p {
+            margin: 8px 0;
+            font-size: 0.95em;
+            color: #333;
+        }
+
+        .course-item a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .course-item a:hover {
+            text-decoration: underline;
+        }
+
+        .no-data-message {
+            text-align: center;
+            font-style: italic;
+            color: #888;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .back-link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
-    <div class="recommendations-container">
-        <h1>My Career Recommendations</h1>
-        <p style="text-align: center;">Based on your profile, skills, and quiz answers.</p>
+<div class="page-layout">
+    <div class="left-content">
+        <div class="recommendations-container">
+            <h1>My Career Recommendations</h1>
 
-        <?php if (isset($_SESSION['recommendation_message'])): ?>
-            <p class="no-data-message"><?php echo $_SESSION['recommendation_message']; ?></p>
-            <?php unset($_SESSION['recommendation_message']); ?>
-        <?php else: ?>
-            <div class="recommendation-section">
-                <h3>Top Career Paths (Scoring-Based Recommendation)</h3>
-                <?php if (!empty($career_compatibility_scores)): ?>
+            <?php if (isset($_SESSION['recommendation_message'])): ?>
+                <p class="no-data-message"><?php echo $_SESSION['recommendation_message']; unset($_SESSION['recommendation_message']); ?></p>
+            <?php else: ?>
+
+                <div class="recommendation-section">
+                    <h3>Top Career Paths</h3>
                     <?php
-                    $num_displayed_recommendations = 5; // Display top 5 careers
-                    $displayed_count = 0;
-                    foreach ($career_compatibility_scores as $career_title => $score):
-                        // Only display if the score is above a certain minimum (e.g., base score + some points)
-                        // This filters out careers with very low relevance.
-                        if ($score > 25 && $displayed_count < $num_displayed_recommendations) : // Adjust this threshold as needed
-                            ?>
-                            <div class="list-item">
-                                <span><strong><?php echo htmlspecialchars($career_title); ?></strong></span>
-                                <span class="score">Compatibility Score: <?php echo htmlspecialchars($score); ?></span>
-                            </div>
-                            <?php
-                            $displayed_count++;
-                        endif;
-                    endforeach;
-                    if ($displayed_count == 0) :
+                    $displayed = 0;
+                    foreach ($career_compatibility_scores as $career => $score) {
+                        if ($score > 25 && $displayed < 5) {
+                            echo "<div class='list-item'><span><strong>" . htmlspecialchars($career) . "</strong></span><span class='score'>Score: " . round($score, 2) . "</span></div>";
+                            $displayed++;
+                        }
+                    }
+                    if ($displayed === 0) {
+                        echo "<p class='no-data-message'>No strong career matches found.</p>";
+                    }
                     ?>
-                        <p class="no-data-message">No significant career recommendations found based on your current inputs. Try updating your profile and quiz answers for more matches.</p>
-                    <?php endif; ?>
-                <?php else: ?>
-                    <p class="no-data-message">No career compatibility scores available. Please ensure your profile and quiz answers are complete.</p>
-                <?php endif; ?>
-            </div>
+                </div>
 
-            <div class="recommendation-section">
+                <div class="recommendation-section">
                 <h3>Skill Enhancement Suggestions (Association Rule Mining)</h3>
                 <?php if (!empty($skill_suggestions)): ?>
                     <?php foreach ($skill_suggestions as $skill_name): ?>
@@ -213,29 +295,40 @@ mysqli_close($conn);
                 <?php endif; ?>
             </div>
 
-            <div class="recommendation-section">
-                <h3>Potential Success Percentages for All Careers (Linear Regression Model)</h3>
-                <p>These scores indicate potential compatibility with various careers, considering a broader range of factors.</p>
-                <?php if (!empty($success_predictions)): ?>
+                <div class="recommendation-section">
+                    <h3>Success Predictions (Linear Regression)</h3>
                     <?php
-                    // Sort predictions by score in descending order
                     arsort($success_predictions);
+                    foreach ($success_predictions as $title => $score) {
+                        echo "<div class='list-item'><span><strong>" . htmlspecialchars($title) . "</strong></span><span class='score'>" . round($score, 2) . "%</span></div>";
+                    }
                     ?>
-                    <?php foreach ($success_predictions as $career_title => $score): ?>
-                        <div class="list-item">
-                            <span><strong><?php echo htmlspecialchars($career_title); ?></strong></span>
-                            <span class="score"><?php echo htmlspecialchars($score); ?>%</span>
-                        </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <p class="no-data-message">Unable to predict success percentages. Please ensure your profile and quiz answers are complete.</p>
-                <?php endif; ?>
-            </div>
-        <?php endif; ?>
+                </div>
 
-        <div class="back-link">
-            <p><a href="dashboard.php">Back to Dashboard</a></p>
+            <?php endif; ?>
+
+            <div class="back-link">
+                <a href="dashboard.php">← Back to Dashboard</a>
+            </div>
         </div>
     </div>
+
+    <!-- ✅ Course Recommendations Sidebar -->
+    <div class="right-sidebar">
+        <h3>Recommended Courses</h3>
+        <?php if (!empty($recommended_courses)): ?>
+            <?php foreach ($recommended_courses as $course): ?>
+                <div class="course-item">
+                    <strong><?php echo htmlspecialchars($course['title']); ?></strong>
+                    <p><?php echo htmlspecialchars($course['description']); ?></p>
+                    <small><em>Skill: <?php echo $course['skill_name'] ?: 'General'; ?></em></small><br>
+                    <a href="<?php echo htmlspecialchars($course['url']); ?>" target="_blank">View Course →</a>
+                </div>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <p class="no-data-message">No course recommendations found.</p>
+        <?php endif; ?>
+    </div>
+</div>
 </body>
 </html>
