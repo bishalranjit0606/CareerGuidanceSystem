@@ -232,7 +232,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $gpa = $_POST['gpa'] ?? null;
     $param_gpa = (empty($gpa) && $gpa !== 0.0 && $gpa !== '0') ? null : (float)$gpa;
 
-    // Process Experience and Projects Summaries
+
+    // New: Process Experience and Projects Summaries
     $experience_summary = trim($_POST['experience_summary'] ?? '');
     $projects_summary = trim($_POST['projects_summary'] ?? '');
 
@@ -310,7 +311,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     $_SESSION['profile_success'] = "Your profile information has been saved successfully!";
-    header("Location: profile.php"); // Redirect back to profile to show success and updated data
+    // --- CHANGE HERE: Redirect to dashboard.php instead of profile.php ---
+    header("Location: dashboard.php"); // Redirect to dashboard
     exit();
 }
 
@@ -577,4 +579,3 @@ mysqli_close($conn);
     </script>
 </body>
 </html>
-
