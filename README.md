@@ -11,6 +11,16 @@ This project is a website designed to help people find the best career path for 
   <li><strong>Administrators (Admins):</strong> People who manage the website's content, like adding new jobs or skills.</li>
 </ul>
 
+<h2>Important: Configure MySQL to Use Port 3307</h2>
+<p>This project uses port 3307 for MySQL instead of the default 3306. Please update your XAMPP settings accordingly:</p>
+<ul>
+  <li>Open XAMPP Control Panel.</li>
+  <li>Go to Manage Servers tab.</li>
+  <li>Select MySQL Database, then click Configure.</li>
+  <li>Change the port number from 3306 to 3307.</li>
+  <li>Save the changes and restart XAMPP.</li>
+</ul>
+
 <h2>Login Credentials</h2>
 <ul>
   <li><strong>User Account:</strong>
@@ -26,6 +36,7 @@ This project is a website designed to help people find the best career path for 
     </ul>
   </li>
 </ul>
+
 
 <h2>What It Can Do (Key Features)</h2>
 <ul>
@@ -115,5 +126,3 @@ CareerGuidanceSystem/
 ├── README.md
 └── database_schema.sql
 </pre>
-
-
