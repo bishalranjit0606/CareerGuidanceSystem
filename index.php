@@ -15,14 +15,15 @@ if (isset($_SESSION['user_id'])) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Career Guidance System</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/style.css" />
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(to right, #e2eefd, #f6f9fc); /* Soft gradient background */
+            background: linear-gradient(to right, #e2eefd, #f6f9fc);
+            /* Soft gradient background */
             color: #333;
             line-height: 1.6;
             margin: 0;
@@ -34,17 +35,19 @@ if (isset($_SESSION['user_id'])) {
 
         .header {
             background-color: #007bff;
-            color: white; /* This sets the default text color for the header */
+            color: white;
+            /* This sets the default text color for the header */
             padding: 20px 0;
             text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         .header h1 {
             margin: 0;
             font-size: 2.8em;
             letter-spacing: 1px;
-            color: white; /* Explicitly setting H1 color to white */
+            color: white;
+            /* Explicitly setting H1 color to white */
         }
 
         .header p {
@@ -54,9 +57,10 @@ if (isset($_SESSION['user_id'])) {
         }
 
         .navbar {
-            background-color: #0056b3; /* Darker blue for nav */
+            background-color: #0056b3;
+            /* Darker blue for nav */
             padding: 10px 0;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
 
@@ -82,17 +86,19 @@ if (isset($_SESSION['user_id'])) {
         }
 
         .navbar ul li a:hover {
-            color: #cceeff; /* Lighter blue on hover */
+            color: #cceeff;
+            /* Lighter blue on hover */
         }
 
         .main-content {
-            flex-grow: 1; /* Allows content to take up available space */
+            flex-grow: 1;
+            /* Allows content to take up available space */
             padding: 40px 20px;
             max-width: 960px;
             margin: 30px auto;
             background-color: #fff;
             border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
             text-align: center;
         }
 
@@ -118,14 +124,14 @@ if (isset($_SESSION['user_id'])) {
             background-color: #f9f9f9;
             padding: 25px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
             text-align: left;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         .feature-item:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
         }
 
         .feature-item h3 {
@@ -140,7 +146,7 @@ if (isset($_SESSION['user_id'])) {
             text-align: center;
             padding: 20px 0;
             margin-top: 40px;
-            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
@@ -183,16 +189,21 @@ if (isset($_SESSION['user_id'])) {
                 <h3>Instant Resume Generation</h3>
                 <p>Generate a basic resume with your profile information and skills in just a few clicks.</p>
             </div>
+            <div class="feature-item">
+                <h3>Course Suggestions</h3>
+                <p>Receive curated course recommendations tailored to your skill enhancement needs.</p>
+            </div>
         </div>
 
         <p style="margin-top: 40px;">
             Ready to start your journey? <a href="register.php" style="color: #007bff; font-weight: bold; text-decoration: none;">Register now</a> or <a href="login.php" style="color: #007bff; font-weight: bold; text-decoration: none;">Login</a> if you already have an account.
         </p>
+
+       
     </main>
 
     <footer class="footer">
-        <p>&copy; <?php echo date("Y"); ?> Career Guidance System. All rights reserved.</p>
+        
     </footer>
 </body>
 </html>
-
