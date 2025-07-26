@@ -11,6 +11,22 @@ This project is a website designed to help people find the best career path for 
   <li><strong>Administrators (Admins):</strong> People who manage the website's content, like adding new jobs or skills.</li>
 </ul>
 
+<h2>Login Credentials</h2>
+<ul>
+  <li><strong>User Account:</strong>
+    <ul>
+      <li>Email: <code>tester@gmail.com</code></li>
+      <li>Password: <code>tester@123</code></li>
+    </ul>
+  </li>
+  <li><strong>Admin Account:</strong>
+    <ul>
+      <li>Email: <code>admin@gmail.com</code></li>
+      <li>Password: <code>Admin@123</code></li>
+    </ul>
+  </li>
+</ul>
+
 <h2>What It Can Do (Key Features)</h2>
 <ul>
   <li><strong>Easy Sign-Up and Login:</strong> Create an account and log in easily.</li>
@@ -99,6 +115,5 @@ CareerGuidanceSystem/
 ├── README.md
 └── database_schema.sql
 </pre>
-# CareerGuidanceSystem
-# CareerGuidanceSystem
-# CareerGuidanceSystem
+
+
