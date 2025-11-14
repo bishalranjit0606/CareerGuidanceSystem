@@ -23,6 +23,15 @@ if ($stmt = mysqli_prepare($conn, $sql_user_details)) {
     mysqli_stmt_close($stmt);
 }
 
+// --- NEW LOGIC: Decode JSON summaries into arrays for use in the form ---
+$work_experiences = json_decode($user_details['experience_summary'] ?? '[]', true);
+if (!is_array($work_experiences)) $work_experiences = [];
+
+$projects = json_decode($user_details['projects_summary'] ?? '[]', true);
+if (!is_array($projects)) $projects = [];
+// -----------------------------------------------------------------------
+
+
 // Fetch all available skills
 $all_skills = [];
 $sql_all_skills = "SELECT id, name FROM skills ORDER BY name ASC";
@@ -233,11 +242,49 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $param_gpa = (empty($gpa) && $gpa !== 0.0 && $gpa !== '0') ? null : (float)$gpa;
 
 
-    // New: Process Experience and Projects Summaries
-    $experience_summary = trim($_POST['experience_summary'] ?? '');
-    $projects_summary = trim($_POST['projects_summary'] ?? '');
+    // --- NEW LOGIC: Process structured Work Experiences and Projects and serialize to JSON ---
 
-    // New: Process Contact and Summary Details
+    // --- 1. Process Work Experiences ---
+    $new_work_experiences = [];
+    if (isset($_POST['work_company']) && is_array($_POST['work_company'])) {
+        $count = count($_POST['work_company']);
+        for ($i = 0; $i < $count; $i++) {
+            $company_name = trim($_POST['work_company'][$i] ?? '');
+            // Only save if the company name is provided
+            if (!empty($company_name)) {
+                $new_work_experiences[] = [
+                    'company' => $company_name,
+                    'position' => trim($_POST['work_position'][$i] ?? ''),
+                    'description' => trim($_POST['work_description'][$i] ?? ''),
+                    'start_date' => trim($_POST['work_start_date'][$i] ?? ''),
+                    'end_date' => trim($_POST['work_end_date'][$i] ?? ''),
+                ];
+            }
+        }
+    }
+    $experience_summary_json = json_encode($new_work_experiences);
+
+
+    // --- 2. Process Projects ---
+    $new_projects = [];
+    if (isset($_POST['project_name']) && is_array($_POST['project_name'])) {
+        $count = count($_POST['project_name']);
+        for ($i = 0; $i < $count; $i++) {
+            $project_name = trim($_POST['project_name'][$i] ?? '');
+            // Only save if the project name is provided
+            if (!empty($project_name)) {
+                $new_projects[] = [
+                    'name' => $project_name,
+                    'description' => trim($_POST['project_description'][$i] ?? ''),
+                ];
+            }
+        }
+    }
+    $projects_summary_json = json_encode($new_projects);
+    // -----------------------------------------------------------------------------------
+
+
+    // New: Process Contact and Summary Details (unchanged)
     $phone_number = trim($_POST['phone_number'] ?? '');
     $linkedin_url = trim($_POST['linkedin_url'] ?? '');
     $summary_text = trim($_POST['summary_text'] ?? '');
@@ -245,11 +292,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $graduation_year = trim($_POST['graduation_year'] ?? '');
 
 
-    // Update users table with all profile fields
+    // Update users table with all profile fields (experience_summary and projects_summary now store JSON)
     $sql_update_user_profile = "UPDATE users SET major = ?, gpa = ?, experience_summary = ?, projects_summary = ?, phone_number = ?, linkedin_url = ?, summary_text = ?, university_name = ?, graduation_year = ? WHERE id = ?";
     if ($stmt = mysqli_prepare($conn, $sql_update_user_profile)) {
-        // 'sssssssssi' -> s=major, s=gpa, s=experience_summary, s=projects_summary, s=phone_number, s=linkedin_url, s=summary_text, s=university_name, s=graduation_year, i=user_id
-        mysqli_stmt_bind_param($stmt, "sssssssssi", $major, $param_gpa, $experience_summary, $projects_summary, $phone_number, $linkedin_url, $summary_text, $university_name, $graduation_year, $user_id);
+        // 'sssssssssi' -> s=major, s=gpa, s=experience_summary (JSON), s=projects_summary (JSON), s=phone_number, s=linkedin_url, s=summary_text, s=university_name, s=graduation_year, i=user_id
+        mysqli_stmt_bind_param($stmt, "sssssssssi", $major, $param_gpa, $experience_summary_json, $projects_summary_json, $phone_number, $linkedin_url, $summary_text, $university_name, $graduation_year, $user_id);
         if (!mysqli_stmt_execute($stmt)) {
             error_log("Error updating user profile: " . mysqli_stmt_error($stmt));
         }
@@ -259,7 +306,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
 
-    // 2. Process Skills
+    // 2. Process Skills (Unchanged)
     // Remove existing skills for the user
     $sql_delete_skills = "DELETE FROM user_skills WHERE user_id = ?";
     if ($stmt = mysqli_prepare($conn, $sql_delete_skills)) {
@@ -281,7 +328,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    // 3. Process Quiz Answers
+    // 3. Process Quiz Answers (Unchanged)
     // Clear previous answers to avoid duplicates on resubmission
     $sql_delete_answers = "DELETE FROM user_answers WHERE user_id = ?";
     if ($stmt = mysqli_prepare($conn, $sql_delete_answers)) {
@@ -390,6 +437,22 @@ mysqli_close($conn);
         .quiz-options label { display: block; margin-bottom: 5px; cursor: pointer; }
         .quiz-options input[type="radio"],
         .quiz-options input[type="checkbox"] { margin-right: 8px; }
+
+        /* --- NEW STYLES FOR DYNAMIC FIELDS --- */
+        .dynamic-item-container { border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 5px; background-color: #f9f9f9; position: relative; }
+        .dynamic-item-container h4 { margin-top: 0; color: #007bff; border-bottom: 1px dashed #ccc; padding-bottom: 5px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; font-size: 1.1em;}
+        .dynamic-item-container h4 span { max-width: 80%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .btn-add, .btn-remove {
+            background-color: #007bff; color: white; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; transition: background-color 0.3s; display: inline-block;
+        }
+        .btn-add { margin-top: 10px; }
+        .btn-add:hover { background-color: #0056b3; }
+        .btn-remove { background-color: #dc3545; padding: 4px 8px; font-size: 12px; margin-left: 10px; }
+        .btn-remove:hover { background-color: #c82333; }
+        .form-group.date-group { display: flex; gap: 15px; }
+        .form-group.date-group > div { flex: 1; }
+        /* -------------------------------------- */
+
 
         .btn-submit {
             background-color: #28a745;
@@ -502,21 +565,23 @@ mysqli_close($conn);
                 </div>
             </div>
 
+            <!-- START NEW DYNAMIC SECTIONS -->
             <div class="form-section">
-                <h3>Work Experience Summary</h3>
-                <div class="form-group">
-                    <label for="experience_summary">Describe your work experience:</label>
-                    <textarea id="experience_summary" name="experience_summary" rows="8" placeholder="e.g., Developed web applications using PHP and MySQL. Managed a team of 3 junior developers. Implemented new features, reducing bug reports by 20%." ><?php echo htmlspecialchars($user_details['experience_summary'] ?? ''); ?></textarea>
+                <h3>Work Experience</h3>
+                <div id="workExperienceContainer">
+                    <!-- Dynamic work experience items will be inserted here by JS -->
                 </div>
+                <button type="button" class="btn-add" id="addWorkExperienceBtn">Add Work Experience</button>
             </div>
 
             <div class="form-section">
-                <h3>Projects Summary</h3>
-                <div class="form-group">
-                    <label for="projects_summary">Describe your key projects:</label>
-                    <textarea id="projects_summary" name="projects_summary" rows="8" placeholder="e.g., Built a full-stack e-commerce platform using React and Node.js. Developed a machine learning model for sentiment analysis. Designed and implemented a secure network architecture." ><?php echo htmlspecialchars($user_details['projects_summary'] ?? ''); ?></textarea>
+                <h3>Projects</h3>
+                <div id="projectsContainer">
+                    <!-- Dynamic project items will be inserted here by JS -->
                 </div>
+                <button type="button" class="btn-add" id="addProjectBtn">Add Project</button>
             </div>
+            <!-- END NEW DYNAMIC SECTIONS -->
 
             <div class="form-section">
                 <h3>Career Interest Quiz</h3>
@@ -557,6 +622,7 @@ mysqli_close($conn);
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // --- Existing Skill Search Logic ---
             const skillSearchInput = document.getElementById('skillSearch');
             const skillsGrid = document.querySelector('.skills-grid');
             const skillLabels = skillsGrid ? skillsGrid.querySelectorAll('.skill-item-label') : [];
@@ -568,13 +634,156 @@ mysqli_close($conn);
                     skillLabels.forEach(label => {
                         const skillName = label.textContent.toLowerCase();
                         if (skillName.includes(searchTerm)) {
-                            label.style.display = 'flex'; // Show the label
+                            label.style.display = 'flex';
                         } else {
-                            label.style.display = 'none'; // Hide the label
+                            label.style.display = 'none';
                         }
                     });
                 });
             }
+            // --- End Existing Skill Search Logic ---
+
+
+            // --- NEW DYNAMIC FORM LOGIC ---
+            const workContainer = document.getElementById('workExperienceContainer');
+            const projectContainer = document.getElementById('projectsContainer');
+
+            // Embed PHP data into JavaScript for initial rendering
+            const existingWorkExperiences = JSON.parse('<?php echo json_encode($work_experiences); ?>');
+            const existingProjects = JSON.parse('<?php echo json_encode($projects); ?>');
+
+
+            // ----------------------------------------------------
+            // --- WORK EXPERIENCE FUNCTIONS ---
+            // ----------------------------------------------------
+
+            // Helper function to create the HTML template for one work experience item
+            function getWorkExperienceTemplate(item = {}) {
+                const company = item.company || '';
+                const position = item.position || '';
+                const description = item.description || '';
+                const startDate = item.start_date || '';
+                const endDate = item.end_date || '';
+
+                return `
+                    <div class="dynamic-item-container">
+                        <h4>
+                            <span class="item-title">${company || 'New Work Experience'}</span>
+                            <button type="button" class="btn-remove">Remove</button>
+                        </h4>
+                        <div class="form-group">
+                            <label>Company Name:</label>
+                            <input type="text" name="work_company[]" value="${company}" required oninput="updateItemTitle(this, 'work')">
+                        </div>
+                        <div class="form-group">
+                            <label>Position/Title:</label>
+                            <input type="text" name="work_position[]" value="${position}" required>
+                        </div>
+                        <div class="form-group date-group">
+                            <div>
+                                <label>Start Date:</label>
+                                <input type="text" name="work_start_date[]" placeholder="e.g., May 2020" value="${startDate}">
+                            </div>
+                            <div>
+                                <label>End Date (or Present):</label>
+                                <input type="text" name="work_end_date[]" placeholder="e.g., Aug 2023 or Present" value="${endDate}">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Description (Key achievements, responsibilities):</label>
+                            <textarea name="work_description[]" rows="4" placeholder="Describe your role and key accomplishments." required>${description}</textarea>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function addWorkExperience(item = {}) {
+                workContainer.insertAdjacentHTML('beforeend', getWorkExperienceTemplate(item));
+            }
+
+            // ----------------------------------------------------
+            // --- PROJECT FUNCTIONS ---
+            // ----------------------------------------------------
+
+            // Helper function to create the HTML template for one project item
+            function getProjectTemplate(item = {}) {
+                const name = item.name || '';
+                const description = item.description || '';
+
+                return `
+                    <div class="dynamic-item-container">
+                        <h4>
+                            <span class="item-title">${name || 'New Project'}</span>
+                            <button type="button" class="btn-remove">Remove</button>
+                        </h4>
+                        <div class="form-group">
+                            <label>Project Name:</label>
+                            <input type="text" name="project_name[]" value="${name}" required oninput="updateItemTitle(this, 'project')">
+                        </div>
+                        <div class="form-group">
+                            <label>Description (Technologies, goals, results):</label>
+                            <textarea name="project_description[]" rows="4" placeholder="Describe what the project is, what technologies you used, and the outcome." required>${description}</textarea>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function addProject(item = {}) {
+                projectContainer.insertAdjacentHTML('beforeend', getProjectTemplate(item));
+            }
+
+            // ----------------------------------------------------
+            // --- CORE JS LOGIC ---
+            // ----------------------------------------------------
+
+            // Global helper function to update titles dynamically in the dynamic-item-container
+            window.updateItemTitle = function(inputElement, type) {
+                const container = inputElement.closest('.dynamic-item-container');
+                if (container) {
+                    const titleElement = container.querySelector('.item-title');
+                    if (titleElement) {
+                        const newTitle = inputElement.value.trim() || `New ${type === 'work' ? 'Work Experience' : 'Project'}`;
+                        titleElement.textContent = newTitle;
+                    }
+                }
+            };
+
+            // 1. Initial Render (Load existing data)
+            if (existingWorkExperiences.length > 0) {
+                existingWorkExperiences.forEach(addWorkExperience);
+            } else {
+                addWorkExperience(); // Add one empty item by default
+            }
+
+            if (existingProjects.length > 0) {
+                existingProjects.forEach(addProject);
+            } else {
+                addProject(); // Add one empty item by default
+            }
+
+
+            // 2. Add Button Listeners
+            document.getElementById('addWorkExperienceBtn').addEventListener('click', () => addWorkExperience());
+            document.getElementById('addProjectBtn').addEventListener('click', () => addProject());
+
+            // 3. Remove Button Listener (Delegated)
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('btn-remove')) {
+                    const container = e.target.closest('.dynamic-item-container');
+                    if (container) {
+                        // Prevent removing the last item
+                        if (container.parentElement.children.length > 1) {
+                            container.remove();
+                        } else {
+                            // Clear fields instead of removing if it's the last item
+                            const inputs = container.querySelectorAll('input[type="text"], textarea');
+                            inputs.forEach(input => input.value = '');
+                            window.updateItemTitle(container.querySelector('input[name^="work_company"], input[name^="project_name"]'), container.parentElement === workContainer ? 'work' : 'project');
+                        }
+                    }
+                }
+            });
+
         });
     </script>
 </body>

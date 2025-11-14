@@ -267,7 +267,7 @@ mysqli_close($conn);
             <?php else: ?>
 
                 <div class="recommendation-section">
-                    <h3>Top Career Paths</h3>
+                    <h3>Top Career Paths & Success Prediction</h3>
                     <?php
                     $displayed = 0;
                     $top_career = null;
@@ -276,7 +276,12 @@ mysqli_close($conn);
                             if ($displayed === 0) {
                                 $top_career = $career; // Store top career for later use
                             }
-                            echo "<div class='list-item'><span><strong>" . htmlspecialchars($career) . "</strong></span></div>";
+                            // Get the success prediction score
+                            $prediction = isset($success_predictions[$career]) ? round($success_predictions[$career], 2) : 'N/A';
+                            $score_html = ($prediction !== 'N/A') ? "<span class='score'>" . $prediction . "%</span>" : "<span class='score'>N/A</span>";
+
+                            // Display the career title and the score side-by-side
+                            echo "<div class='list-item'><span><strong>" . htmlspecialchars($career) . "</strong></span>" . $score_html . "</div>";
                             $displayed++;
                         }
                     }
@@ -285,9 +290,8 @@ mysqli_close($conn);
                     }
                     ?>
                 </div>
-
                 <div class="recommendation-section">
-                    <h3>Skill Enhancement Suggestions (Association Rule Mining)</h3>
+                    <h3>Skill Enhancement Suggestions</h3>
                     <?php if (!empty($skill_suggestions)): ?>
                         <?php foreach ($skill_suggestions as $skill_name): ?>
                             <div class="list-item">
@@ -299,35 +303,7 @@ mysqli_close($conn);
                     <?php endif; ?>
                 </div>
 
-         <div class="recommendation-section">
-    <h3>Success Predictions for Top Career Paths</h3>
-    <?php
-    $top_careers = [];
-    $displayed = 0;
-
-    // Reuse the sorted compatibility scores to get top 4 with score > 25
-    foreach ($career_compatibility_scores as $career => $score) {
-        if ($score > 25 && $displayed < 4) {
-            $top_careers[] = $career;
-            $displayed++;
-        }
-    }
-
-    if (!empty($top_careers)) {
-        foreach ($top_careers as $career_title) {
-            if (isset($success_predictions[$career_title])) {
-                $prediction = round($success_predictions[$career_title], 2);
-                echo "<div class='list-item'><span><strong>" . htmlspecialchars($career_title) . "</strong></span><span class='score'>" . $prediction . "%</span></div>";
-            }
-        }
-    } else {
-        echo "<p class='no-data-message'>No success predictions available for top careers.</p>";
-    }
-    ?>
-</div>
-
-
-            <?php endif; ?>
+                <?php endif; ?>
 
             <div class="back-link">
                 <a href="dashboard.php">← Back to Dashboard</a>
@@ -335,7 +311,6 @@ mysqli_close($conn);
         </div>
     </div>
 
-    <!-- Course Recommendations Sidebar -->
     <div class="right-sidebar">
         <h3>Recommended Courses</h3>
         <?php if (!empty($recommended_courses)): ?>
