@@ -141,7 +141,7 @@ mysqli_close($conn);
         </div>
 
         <div class="back-link">
-            <p><a href="../logout.php">Logout</a></p>
+            <p><a href="../auth/logout.php">Logout</a></p>
         </div>
     </div>
 </body>

@@ -104,7 +104,7 @@ $user_name = htmlspecialchars($_SESSION['user_name']); // Get user's name from s
                 <!-- <li><a href="quiz.php">Take Quiz</a></li> -->
                 <li><a href="recommendations.php">My Recommendations</a></li>
                 <li><a href="generate_resume.php">Generate Resume</a></li>
-                <li><a href="../logout.php">Logout</a></li>
+                <li><a href="../auth/logout.php">Logout</a></li>
             </ul>
         </nav>
 
