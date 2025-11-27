@@ -12,6 +12,126 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 $message = '';
 $message_type = ''; // 'success' or 'error'
 
+// Initialize edit user variable
+$edit_user = null;
+
+// Handle Edit User Fetch
+if (isset($_GET['edit_id'])) {
+    $edit_id = $_GET['edit_id'];
+    $sql_fetch_edit = "SELECT * FROM users WHERE id = ?";
+    if ($stmt = mysqli_prepare($conn, $sql_fetch_edit)) {
+        mysqli_stmt_bind_param($stmt, "i", $edit_id);
+        mysqli_stmt_execute($stmt);
+        $result_edit = mysqli_stmt_get_result($stmt);
+        if ($row = mysqli_fetch_assoc($result_edit)) {
+            $edit_user = $row;
+        }
+        mysqli_stmt_close($stmt);
+    }
+}
+
+// Handle Add User
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_user'])) {
+    $name = trim($_POST['name']);
+    $email = trim($_POST['email']);
+    $password = $_POST['password'];
+    $role = $_POST['role'];
+
+    if (empty($name) || empty($email) || empty($password) || empty($role)) {
+        $message = "All fields are required.";
+        $message_type = "error";
+    } else {
+        // Check if email already exists
+        $sql_check = "SELECT id FROM users WHERE email = ?";
+        if ($stmt = mysqli_prepare($conn, $sql_check)) {
+            mysqli_stmt_bind_param($stmt, "s", $email);
+            mysqli_stmt_execute($stmt);
+            mysqli_stmt_store_result($stmt);
+            if (mysqli_stmt_num_rows($stmt) > 0) {
+                $message = "Email already exists.";
+                $message_type = "error";
+            } else {
+                // Insert new user
+                $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                $sql_insert = "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)";
+                if ($stmt_insert = mysqli_prepare($conn, $sql_insert)) {
+                    mysqli_stmt_bind_param($stmt_insert, "ssss", $name, $email, $hashed_password, $role);
+                    if (mysqli_stmt_execute($stmt_insert)) {
+                        $message = "User added successfully!";
+                        $message_type = "success";
+                    } else {
+                        $message = "Error adding user: " . mysqli_error($conn);
+                        $message_type = "error";
+                    }
+                    mysqli_stmt_close($stmt_insert);
+                }
+            }
+            mysqli_stmt_close($stmt);
+        }
+    }
+}
+
+// Handle Update User
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_user'])) {
+    $user_id = $_POST['user_id'];
+    $name = trim($_POST['name']);
+    $email = trim($_POST['email']);
+    $role = $_POST['role'];
+    $password = $_POST['password']; // Optional
+
+    if (empty($name) || empty($email) || empty($role)) {
+        $message = "Name, Email, and Role are required.";
+        $message_type = "error";
+    } else {
+        // Check if email exists for OTHER users
+        $sql_check = "SELECT id FROM users WHERE email = ? AND id != ?";
+        if ($stmt = mysqli_prepare($conn, $sql_check)) {
+            mysqli_stmt_bind_param($stmt, "si", $email, $user_id);
+            mysqli_stmt_execute($stmt);
+            mysqli_stmt_store_result($stmt);
+            if (mysqli_stmt_num_rows($stmt) > 0) {
+                $message = "Email already exists for another user.";
+                $message_type = "error";
+            } else {
+                // Update user
+                if (!empty($password)) {
+                    // Update with password
+                    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                    $sql_update = "UPDATE users SET name = ?, email = ?, role = ?, password = ? WHERE id = ?";
+                    if ($stmt_update = mysqli_prepare($conn, $sql_update)) {
+                        mysqli_stmt_bind_param($stmt_update, "ssssi", $name, $email, $role, $hashed_password, $user_id);
+                        if (mysqli_stmt_execute($stmt_update)) {
+                            $message = "User updated successfully!";
+                            $message_type = "success";
+                            $edit_user = null; // Clear edit mode
+                        } else {
+                            $message = "Error updating user: " . mysqli_error($conn);
+                            $message_type = "error";
+                        }
+                        mysqli_stmt_close($stmt_update);
+                    }
+                } else {
+                    // Update without password
+                    $sql_update = "UPDATE users SET name = ?, email = ?, role = ? WHERE id = ?";
+                    if ($stmt_update = mysqli_prepare($conn, $sql_update)) {
+                        mysqli_stmt_bind_param($stmt_update, "sssi", $name, $email, $role, $user_id);
+                        if (mysqli_stmt_execute($stmt_update)) {
+                            $message = "User updated successfully!";
+                            $message_type = "success";
+                            $edit_user = null; // Clear edit mode
+                        } else {
+                            $message = "Error updating user: " . mysqli_error($conn);
+                            $message_type = "error";
+                        }
+                        mysqli_stmt_close($stmt_update);
+                    }
+                }
+            }
+            mysqli_stmt_close($stmt);
+        }
+    }
+}
+
 // Handle user deletion
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_user'])) {
     $user_id_to_delete = $_POST['user_id'];
@@ -181,6 +301,76 @@ mysqli_close($conn);
             opacity: 0.5;
             cursor: not-allowed;
         }
+        
+        /* Form Styles */
+        .user-form {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+        .user-form h2 {
+            margin-top: 0;
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .btn-submit {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .btn-submit:hover {
+            background-color: #218838;
+        }
+        .btn-cancel {
+            background-color: #6c757d;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-cancel:hover {
+            background-color: #5a6268;
+        }
+        .btn-edit {
+            background-color: #007bff;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-edit:hover {
+            background-color: #0069d9;
+        }
     </style>
 </head>
 <body>
@@ -190,6 +380,47 @@ mysqli_close($conn);
         <?php if ($message): ?>
             <div class="message <?php echo $message_type; ?>"><?php echo $message; ?></div>
         <?php endif; ?>
+
+        <!-- Add/Edit User Form -->
+        <div class="user-form">
+            <h2><?php echo $edit_user ? 'Edit User' : 'Add New User'; ?></h2>
+            <form action="manage_users.php" method="POST">
+                <?php if ($edit_user): ?>
+                    <input type="hidden" name="user_id" value="<?php echo $edit_user['id']; ?>">
+                <?php endif; ?>
+                
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name" value="<?php echo $edit_user ? htmlspecialchars($edit_user['name']) : ''; ?>" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" value="<?php echo $edit_user ? htmlspecialchars($edit_user['email']) : ''; ?>" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password: <?php echo $edit_user ? '<small>(Leave blank to keep current)</small>' : ''; ?></label>
+                    <input type="password" id="password" name="password" <?php echo $edit_user ? '' : 'required'; ?>>
+                </div>
+                
+                <div class="form-group">
+                    <label for="role">Role:</label>
+                    <select id="role" name="role" required>
+                        <option value="user" <?php echo ($edit_user && $edit_user['role'] == 'user') ? 'selected' : ''; ?>>User</option>
+                        <option value="admin" <?php echo ($edit_user && $edit_user['role'] == 'admin') ? 'selected' : ''; ?>>Admin</option>
+                    </select>
+                </div>
+                
+                <button type="submit" name="<?php echo $edit_user ? 'update_user' : 'add_user'; ?>" class="btn-submit">
+                    <?php echo $edit_user ? 'Update User' : 'Add User'; ?>
+                </button>
+                
+                <?php if ($edit_user): ?>
+                    <a href="manage_users.php" class="btn-cancel">Cancel</a>
+                <?php endif; ?>
+            </form>
+        </div>
 
         <?php if (!empty($users)): ?>
             <table class="user-list-table">
@@ -213,8 +444,9 @@ mysqli_close($conn);
                             <td><?php echo htmlspecialchars(date('Y-m-d H:i', strtotime($user['created_at']))); ?></td>
                             <td>
                                 <div class="action-buttons">
+                                    <a href="manage_users.php?edit_id=<?php echo $user['id']; ?>" class="btn-edit">Edit</a>
                                     <?php if ($user['id'] != $_SESSION['user_id']): // Prevent admin from deleting themselves ?>
-                                        <form action="manage_users.php" method="POST" onsubmit="return confirm('WARNING: Are you sure you want to delete user <?php echo htmlspecialchars(addslashes($user['name'])); ?>? This will delete ALL associated data (skills, answers, recommendations) and cannot be undone!');">
+                                        <form action="manage_users.php" method="POST" onsubmit="return confirm('WARNING: Are you sure you want to delete user <?php echo htmlspecialchars(addslashes($user['name'])); ?>? This will delete ALL associated data (skills, answers, recommendations) and cannot be undone!');" style="display:inline;">
                                             <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
                                             <button type="submit" name="delete_user" class="btn-delete">Delete</button>
                                         </form>

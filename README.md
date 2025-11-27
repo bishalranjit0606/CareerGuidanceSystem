@@ -126,3 +126,39 @@ CareerGuidanceSystem/
 ├── README.md
 └── database_schema.sql
 </pre>
+
+<h2>How to Run with Docker (Easiest Way)</h2>
+<p>You can run this project easily using Docker without setting up XAMPP manually.</p>
+
+<h3>Prerequisites</h3>
+<ul>
+  <li>Make sure you have <strong>Docker Desktop</strong> installed and running.</li>
+</ul>
+
+<h3>Steps</h3>
+<ol>
+  <li>Open your terminal or command prompt.</li>
+  <li>Navigate to the <code>docker</code> folder inside the project:
+    <pre><code>cd docker</code></pre>
+  </li>
+  <li>Run the following command to start the app:
+    <pre><code>docker-compose up -d --build</code></pre>
+  </li>
+  <li>Open your browser and go to:
+    <a href="http://localhost:8080">http://localhost:8080</a>
+  </li>
+  <li>To view the database (phpMyAdmin), go to:
+    <a href="http://localhost:8081">http://localhost:8081</a>
+    <ul>
+      <li><strong>Server:</strong> db</li>
+      <li><strong>Username:</strong> root</li>
+      <li><strong>Password:</strong> rootpassword</li>
+    </ul>
+  </li>
+</ol>
+
+<p>That's it! The database and everything else will be set up automatically.</p>
+
+<h3>Stopping the App</h3>
+<p>To stop the project, run:</p>
+<pre><code>docker-compose down</code></pre>

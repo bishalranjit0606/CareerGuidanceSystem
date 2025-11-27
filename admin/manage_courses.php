@@ -47,21 +47,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $message_type = "error";
             }
         } else {
-            // Add new course
-            $sql = "INSERT INTO courses (title, description, url, skill_id) VALUES (?, ?, ?, ?)";
-            if ($stmt = mysqli_prepare($conn, $sql)) {
-                mysqli_stmt_bind_param($stmt, "sssi", $title, $description, $url, $skill_id);
-                if (mysqli_stmt_execute($stmt)) {
-                    $message = "Course added successfully!";
-                    $message_type = "success";
-                } else {
-                    $message = "Error adding course: " . mysqli_error($conn);
+            // Check for duplicate course title
+            $check_sql = "SELECT id FROM courses WHERE title = ?";
+            $duplicate_found = false;
+            if ($check_stmt = mysqli_prepare($conn, $check_sql)) {
+                mysqli_stmt_bind_param($check_stmt, "s", $title);
+                mysqli_stmt_execute($check_stmt);
+                mysqli_stmt_store_result($check_stmt);
+                if (mysqli_stmt_num_rows($check_stmt) > 0) {
+                    $duplicate_found = true;
+                    $message = "Course with this name already exists.";
                     $message_type = "error";
                 }
-                mysqli_stmt_close($stmt);
-            } else {
-                $message = "Error preparing insert statement: " . mysqli_error($conn);
-                $message_type = "error";
+                mysqli_stmt_close($check_stmt);
+            }
+
+            if (!$duplicate_found) {
+                // Add new course
+                $sql = "INSERT INTO courses (title, description, url, skill_id) VALUES (?, ?, ?, ?)";
+                if ($stmt = mysqli_prepare($conn, $sql)) {
+                    mysqli_stmt_bind_param($stmt, "sssi", $title, $description, $url, $skill_id);
+                    if (mysqli_stmt_execute($stmt)) {
+                        $message = "Course added successfully!";
+                        $message_type = "success";
+                    } else {
+                        $message = "Error adding course: " . mysqli_error($conn);
+                        $message_type = "error";
+                    }
+                    mysqli_stmt_close($stmt);
+                } else {
+                    $message = "Error preparing insert statement: " . mysqli_error($conn);
+                    $message_type = "error";
+                }
             }
         }
     }

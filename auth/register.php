@@ -4,9 +4,9 @@ session_start();
 // Redirect if already logged in
 if (isset($_SESSION['user_id'])) {
     if ($_SESSION['role'] == 'admin') {
-        header('Location: admin/dashboard.php');
+        header('Location: ../admin/dashboard.php');
     } else {
-        header('Location: user/dashboard.php');
+        header('Location: ../user/dashboard.php');
     }
     exit;
 }
@@ -17,7 +17,7 @@ if (isset($_SESSION['user_id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - Career Guidance System</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f4f4; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
         .register-container { background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 350px; text-align: center; }
@@ -60,14 +60,20 @@ if (isset($_SESSION['user_id'])) {
             unset($_SESSION['registration_error']);
         }
         ?>
-        <form action="backend/process_registration.php" method="POST">
+        <form action="../backend/process_registration.php" method="POST" onsubmit="return validateForm()">
             <div class="form-group">
                 <label for="name">Name:</label>
                 <input type="text" id="name" name="name" required>
+                <div id="nameError" class="error"></div>
             </div>
             <div class="form-group">
                 <label for="email">Email:</label>
                 <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="phone_number">Mobile Number:</label>
+                <input type="text" id="phone_number" name="phone_number" required>
+                <div id="phoneError" class="error"></div>
             </div>
             <div class="form-group">
                 <label for="password">Password:</label>
@@ -79,6 +85,35 @@ if (isset($_SESSION['user_id'])) {
             </div>
             <button type="submit" class="btn">Register</button>
         </form>
+        <script>
+            function validateForm() {
+                var name = document.getElementById('name').value;
+                var phone = document.getElementById('phone_number').value;
+                var nameError = document.getElementById('nameError');
+                var phoneError = document.getElementById('phoneError');
+                var isValid = true;
+
+                // Name validation: only letters and spaces
+                var nameRegex = /^[A-Za-z\s]+$/;
+                if (!nameRegex.test(name)) {
+                    nameError.textContent = "Name must contain only letters and spaces.";
+                    isValid = false;
+                } else {
+                    nameError.textContent = "";
+                }
+
+                // Phone validation: only digits
+                var phoneRegex = /^\d+$/;
+                if (!phoneRegex.test(phone)) {
+                    phoneError.textContent = "Mobile number must contain only digits.";
+                    isValid = false;
+                } else {
+                    phoneError.textContent = "";
+                }
+
+                return isValid;
+            }
+        </script>
         <p class="link-text">Already have an account? <a href="login.php">Login here</a>.</p>
     </div>
 </body>

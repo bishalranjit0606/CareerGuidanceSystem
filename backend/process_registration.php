@@ -6,32 +6,45 @@ require_once '../config/config.php'; // Path to your database config file
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = trim($_POST['name']);
     $email = trim($_POST['email']);
+    $phone_number = trim($_POST['phone_number']);
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
     $role = 'user'; // Default role for new registrations
 
     // Server-side validation
-    if (empty($name) || empty($email) || empty($password) || empty($confirm_password)) {
+    if (empty($name) || empty($email) || empty($phone_number) || empty($password) || empty($confirm_password)) {
         $_SESSION['registration_error'] = "All fields are required.";
-        header("Location: ../register.php");
+        header("Location: ../auth/register.php");
+        exit();
+    }
+
+    if (!preg_match("/^[a-zA-Z\s]+$/", $name)) {
+        $_SESSION['registration_error'] = "Name must contain only letters and spaces.";
+        header("Location: ../auth/register.php");
+        exit();
+    }
+
+    if (!ctype_digit($phone_number)) {
+        $_SESSION['registration_error'] = "Mobile number must contain only digits.";
+        header("Location: ../auth/register.php");
         exit();
     }
 
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $_SESSION['registration_error'] = "Invalid email format.";
-        header("Location: ../register.php");
+        header("Location: ../auth/register.php");
         exit();
     }
 
     if ($password !== $confirm_password) {
         $_SESSION['registration_error'] = "Passwords do not match.";
-        header("Location: ../register.php");
+        header("Location: ../auth/register.php");
         exit();
     }
 
     if (strlen($password) < 6) {
         $_SESSION['registration_error'] = "Password must be at least 6 characters long.";
-        header("Location: ../register.php");
+        header("Location: ../auth/register.php");
         exit();
     }
 
@@ -44,12 +57,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             mysqli_stmt_store_result($stmt);
             if (mysqli_stmt_num_rows($stmt) == 1) {
                 $_SESSION['registration_error'] = "This email is already registered.";
-                header("Location: ../register.php");
+                header("Location: ../auth/register.php");
                 exit();
             }
         } else {
             $_SESSION['registration_error'] = "Oops! Something went wrong. Please try again later.";
-            header("Location: ../register.php");
+            header("Location: ../auth/register.php");
             exit();
         }
         mysqli_stmt_close($stmt);
@@ -59,22 +72,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
     // Insert user into database
-    $sql_insert_user = "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)";
+    $sql_insert_user = "INSERT INTO users (name, email, phone_number, password, role) VALUES (?, ?, ?, ?, ?)";
     if ($stmt = mysqli_prepare($conn, $sql_insert_user)) {
-        mysqli_stmt_bind_param($stmt, "ssss", $param_name, $param_email, $param_password, $param_role);
+        mysqli_stmt_bind_param($stmt, "sssss", $param_name, $param_email, $param_phone, $param_password, $param_role);
         $param_name = $name;
         $param_email = $email;
+        $param_phone = $phone_number;
         $param_password = $hashed_password;
         $param_role = $role;
 
         if (mysqli_stmt_execute($stmt)) {
             // Registration successful, redirect to login page
             $_SESSION['registration_success'] = "Registration successful! Please log in.";
-            header("Location: ../login.php");
+            header("Location: ../auth/login.php");
             exit();
         } else {
             $_SESSION['registration_error'] = "Error: Could not register user. " . mysqli_error($conn);
-            header("Location: ../register.php");
+            header("Location: ../auth/register.php");
             exit();
         }
         mysqli_stmt_close($stmt);
@@ -82,7 +96,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     mysqli_close($conn);
 } else {
     // If accessed directly without POST
-    header("Location: ../register.php");
+    header("Location: ../auth/register.php");
     exit();
 }
 ?>

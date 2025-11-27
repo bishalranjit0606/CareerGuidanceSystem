@@ -1,5 +1,5 @@
 <?php
-// algorithms/career_scoring.php
+// algorithms/weighted_rule_based_filtering.
 
 /**
  * Calculates a compatibility score for each career based on user's skills and quiz answers.

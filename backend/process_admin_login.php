@@ -10,7 +10,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Server-side validation
     if (empty($email) || empty($password)) {
         $_SESSION['admin_login_error'] = "Please enter email and password.";
-        header("Location: ../admin_login.php");
+        header("Location: ../admin/admin_login.php");
         exit();
     }
 
@@ -53,11 +53,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     mysqli_close($conn);
 
-    header("Location: ../admin_login.php");
+    header("Location: ../admin/admin_login.php");
     exit();
 } else {
     // If accessed directly without POST
-    header("Location: ../admin_login.php");
+    header("Location: ../admin/admin_login.php");
     exit();
 }
 ?>

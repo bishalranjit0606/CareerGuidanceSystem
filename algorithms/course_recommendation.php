@@ -1,5 +1,5 @@
 <?php
-// algorithms/course_recommendation.php
+// algorithms/Content-Based Filtering
 
 function getCourseRecommendations($conn, $suggested_skill_ids) {
     $recommended_courses = [];

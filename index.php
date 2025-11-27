@@ -223,9 +223,9 @@
     <nav class="navbar">
         <ul>
             <li><a href="index.php">Home</a></li>
-            <li><a href="login.php">User Login</a></li>
-            <li><a href="register.php">Register</a></li>
-            <li><a href="admin_login.php">Admin Login</a></li>
+            <li><a href="auth/login.php">User Login</a></li>
+            <li><a href="auth/register.php">Register</a></li>
+            <li><a href="admin/admin_login.php">Admin Login</a></li>
         </ul>
     </nav>
 
@@ -276,8 +276,8 @@
         <section class="section cta-section">
             <p>Ready to start your journey?</p>
             <div class="cta-buttons">
-                <a href="register.php" class="btn btn-primary">Register Now</a>
-                <a href="login.php" class="btn btn-secondary">Login</a>
+                <a href="auth/register.php" class="btn btn-primary">Register Now</a>
+                <a href="auth/login.php" class="btn btn-secondary">Login</a>
             </div>
         </section>
     </main>
