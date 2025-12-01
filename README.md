@@ -11,13 +11,13 @@ This project is a website designed to help people find the best career path for 
   <li><strong>Administrators (Admins):</strong> People who manage the website's content, like adding new jobs or skills.</li>
 </ul>
 
-<h2>Important: Configure MySQL to Use Port 3307</h2>
-<p>This project uses port 3307 for MySQL instead of the default 3306. Please update your XAMPP settings accordingly:</p>
+<h2>Important: Configure MySQL to Use Port 3306</h2>
+<p>This project uses port 3306 for MySQL. Please ensure your XAMPP settings are configured correctly:</p>
 <ul>
   <li>Open XAMPP Control Panel.</li>
   <li>Go to Manage Servers tab.</li>
   <li>Select MySQL Database, then click Configure.</li>
-  <li>Change the port number from 3306 to 3307.</li>
+  <li>Ensure the port number is set to 3306.</li>
   <li>Save the changes and restart XAMPP.</li>
 </ul>
 

@@ -673,11 +673,11 @@ mysqli_close($conn);
                         </h4>
                         <div class="form-group">
                             <label>Company Name:</label>
-                            <input type="text" name="work_company[]" value="${company}" required oninput="updateItemTitle(this, 'work')">
+                            <input type="text" name="work_company[]" value="${company}" oninput="updateItemTitle(this, 'work')">
                         </div>
                         <div class="form-group">
                             <label>Position/Title:</label>
-                            <input type="text" name="work_position[]" value="${position}" required>
+                            <input type="text" name="work_position[]" value="${position}">
                         </div>
                         <div class="form-group date-group">
                             <div>
@@ -691,7 +691,7 @@ mysqli_close($conn);
                         </div>
                         <div class="form-group">
                             <label>Description (Key achievements, responsibilities):</label>
-                            <textarea name="work_description[]" rows="4" placeholder="Describe your role and key accomplishments." required>${description}</textarea>
+                            <textarea name="work_description[]" rows="4" placeholder="Describe your role and key accomplishments.">${description}</textarea>
                         </div>
                     </div>
                 `;
@@ -718,11 +718,11 @@ mysqli_close($conn);
                         </h4>
                         <div class="form-group">
                             <label>Project Name:</label>
-                            <input type="text" name="project_name[]" value="${name}" required oninput="updateItemTitle(this, 'project')">
+                            <input type="text" name="project_name[]" value="${name}" oninput="updateItemTitle(this, 'project')">
                         </div>
                         <div class="form-group">
                             <label>Description (Technologies, goals, results):</label>
-                            <textarea name="project_description[]" rows="4" placeholder="Describe what the project is, what technologies you used, and the outcome." required>${description}</textarea>
+                            <textarea name="project_description[]" rows="4" placeholder="Describe what the project is, what technologies you used, and the outcome.">${description}</textarea>
                         </div>
                     </div>
                 `;

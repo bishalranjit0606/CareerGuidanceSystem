@@ -21,7 +21,7 @@
 ## Database
 - The database is automatically initialized with the `database/career_guidance_db.sql` file.
 - **Host**: `db`
-- **Port**: `3306` (Internal), `3307` (External)
+- **Port**: `3306` (Internal), `3306` (External)
 - **User**: `root`
 - **Password**: `rootpassword`
 - **Database**: `career_guidance_db`

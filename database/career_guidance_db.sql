@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Jul 26, 2025 at 07:30 PM
+-- Generation Time: Dec 01, 2025 at 05:53 AM
 -- Server version: 10.4.28-MariaDB
--- PHP Version: 8.0.28
+-- PHP Version: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -126,7 +126,6 @@ INSERT INTO `courses` (`id`, `title`, `description`, `url`, `skill_id`, `created
 (57, 'DNS and DHCP Fundamentals', 'Understand how DNS and DHCP work and how to configure them.', 'https://www.udemy.com/course/dns-dhcp-fundamentals/', 174, '2025-07-14 20:30:57'),
 (58, 'Linux for Beginners: The Complete Linux Training Course', 'Master the Linux operating system from scratch for system administration and development.', 'https://www.udemy.com/course/linux-training/', NULL, '2025-07-14 20:30:57'),
 (59, 'Windows Server Administration Fundamentals', 'Learn the basics of managing and administering Windows Server environments.', 'https://www.udemy.com/course/windows-server-administration/', 170, '2025-07-14 20:30:57'),
-(60, 'Agile Project Management', 'Learn Agile methodologies and Scrum framework for effective project management.', 'https://www.coursera.org/learn/agile-project-management', 8, '2025-07-14 20:30:57'),
 (61, 'Communication Skills: Become a Master Communicator', 'Improve your public speaking, active listening, and interpersonal skills.', 'https://www.udemy.com/course/communication-skills-become-a-master-communicator/', 180, '2025-07-14 20:30:57'),
 (62, 'Critical Thinking Skills for Problem Solvers', 'Develop your critical thinking and problem-solving abilities.', 'https://www.udemy.com/course/critical-thinking-skills/', 5, '2025-07-14 20:30:57'),
 (63, 'Leadership and Management Skills', 'Develop essential leadership and management skills for career advancement.', 'https://www.udemy.com/course/leadership-and-management-skills/', 190, '2025-07-14 20:30:57'),
@@ -153,7 +152,8 @@ INSERT INTO `courses` (`id`, `title`, `description`, `url`, `skill_id`, `created
 (84, 'Training and Development for HR Professionals', 'Design and deliver effective training programs for employee growth.', 'https://www.udemy.com/course/training-and-development-for-hr-professionals/', NULL, '2025-07-14 20:30:57'),
 (85, 'Ethical Conduct in the Workplace', 'Understand the importance of ethics and professional conduct in HR.', 'https://www.udemy.com/course/ethical-conduct-in-the-workplace/', NULL, '2025-07-14 20:30:57'),
 (86, 'Data Privacy and GDPR Compliance', 'Learn about data privacy regulations and compliance in HR.', 'https://www.udemy.com/course/data-privacy-gdpr-compliance/', NULL, '2025-07-14 20:30:57'),
-(87, 'HR Compliance & Employment Law', 'Understand key employment laws and compliance requirements for HR.', 'https://www.udemy.com/course/hr-compliance-employment-law/', NULL, '2025-07-14 20:30:57');
+(87, 'HR Compliance & Employment Law', 'Understand key employment laws and compliance requirements for HR.', 'https://www.udemy.com/course/hr-compliance-employment-law/', NULL, '2025-07-14 20:30:57'),
+(88, 'Agile Project Management', 'project', 'https://www.coursera.org/learn/agile-project-management', 181, '2025-11-26 10:19:31');
 
 -- --------------------------------------------------------
 
@@ -174,15 +174,15 @@ CREATE TABLE `recommendations` (
 --
 
 INSERT INTO `recommendations` (`id`, `user_id`, `career_id`, `success_score`, `recommended_at`) VALUES
-(414, 5, 8, 72.00, '2025-07-26 17:21:44'),
-(415, 5, 9, 23.89, '2025-07-26 17:21:44'),
-(416, 5, 1, 28.68, '2025-07-26 17:21:44'),
-(417, 5, 3, 24.28, '2025-07-26 17:21:44'),
-(418, 5, 6, 20.45, '2025-07-26 17:21:44'),
-(419, 5, 5, 30.80, '2025-07-26 17:21:44'),
-(420, 5, 7, 19.89, '2025-07-26 17:21:44'),
-(421, 5, 4, 29.40, '2025-07-26 17:21:44'),
-(422, 5, 2, 18.27, '2025-07-26 17:21:44');
+(585, 5, 8, 78.16, '2025-11-26 05:12:04'),
+(586, 5, 9, 24.44, '2025-11-26 05:12:04'),
+(587, 5, 1, 29.20, '2025-11-26 05:12:04'),
+(588, 5, 3, 24.81, '2025-11-26 05:12:04'),
+(589, 5, 6, 21.05, '2025-11-26 05:12:04'),
+(590, 5, 5, 31.19, '2025-11-26 05:12:04'),
+(591, 5, 7, 20.26, '2025-11-26 05:12:04'),
+(592, 5, 4, 29.81, '2025-11-26 05:12:04'),
+(593, 5, 2, 18.99, '2025-11-26 05:12:04');
 
 -- --------------------------------------------------------
 
@@ -432,7 +432,7 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`, `created_at`, `major`, `gpa`, `experience_summary`, `projects_summary`, `phone_number`, `linkedin_url`, `summary_text`, `university_name`, `graduation_year`) VALUES
 (2, 'admin', 'admin@gmail.com', '$2y$10$2x885dh5RFrKyUvmWM9v/Ofp1fwp555R4wUzwplwJded0YQb7B3My', 'admin', '2025-07-06 16:18:46', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(5, 'tester', 'tester@gmail.com', '$2y$10$UWUytlcI/wUxh1c/fhV99.1ejWjS7KV51oeWZPIliqP6XhbvCcprS', 'user', '2025-07-26 16:52:57', 'computer application', 3.43, '', 'Deployed a Node.js application inside a Docker container on an AWS EC2 instance. Followed a step-by-step approach to containerize the app and configure it for production using AWS infrastructure. Gained hands-on experience with Docker, EC2, and cloud-based deployment workflows.', '9812241818', 'https://www.linkedin.com/in/tester/', 'Results-driven and detail-oriented professional with a proven ability to adapt quickly, solve complex problems, and deliver high-quality work under pressure. Strong communication, organizational, and analytical skills, with a passion for\r\ncontinuous learning and contributing to team success.', 'Tribhuvan university', '2025');
+(5, 'tester', 'tester@gmail.com', '$2y$10$UWUytlcI/wUxh1c/fhV99.1ejWjS7KV51oeWZPIliqP6XhbvCcprS', 'user', '2025-07-26 16:52:57', 'computer science', 4.00, '[{\"company\":\"kathmandu bernhardt college\",\"position\":\"intern\",\"description\":\"Completed a dynamic internship, gaining extensive hands-on experience in IT infrastructure and developing strong foundational skills in computer networking, cabling management, and firewall configuration. This role provided direct exposure to industry best practices in security and network maintenance, significantly improving my professional competence in a fast-paced environment and building a strong practical knowledge base.\",\"start_date\":\"june 2025\",\"end_date\":\"present\"}]', '[{\"name\":\"3 tier web app deployed\",\"description\":\"Designed and deployed a highly scalable 3-Tier Application environment on AWS. The architecture leverages VPC and Subnets for secure foundational networking, utilizes EC2 instances managed by an Auto Scaling Group (ASG) for high availability, and uses an Application Load Balancer (ALB) for intelligent traffic distribution.\"}]', '9800000000', 'https://www.linkedin.com/in/testeruser/', 'Results-driven and detail-oriented professional with a proven ability to adapt quickly, solve complex problems, and deliver high-quality work under pressure.', 'testing university', '2025');
 
 -- --------------------------------------------------------
 
@@ -452,19 +452,19 @@ CREATE TABLE `user_answers` (
 --
 
 INSERT INTO `user_answers` (`id`, `user_id`, `question`, `answer`) VALUES
-(292, 5, 'What is your ideal work environment?', 'Flexible environment with autonomy, creativity, and less rigid structure'),
-(293, 5, 'How do you prefer to approach problem-solving?', 'Experimenting and iterating quickly to find solutions'),
-(294, 5, 'What kind of tasks do you find most engaging?', 'Managing projects and coordinating teams||Researching new technologies and concepts||Securing systems and preventing attacks'),
-(295, 5, 'How do you prefer to learn new technologies or skills?', 'Hands-on coding/building projects'),
-(296, 5, 'How comfortable are you with continuous learning and adapting to new tools?', 'Extremely comfortable, I thrive on new challenges'),
-(297, 5, 'Which of the following areas interests you most?', 'Cloud Computing & DevOps'),
-(298, 5, 'Are you comfortable with abstract concepts and theoretical frameworks?', 'Somewhat comfortable, I prefer practical applications'),
-(299, 5, 'How much do you enjoy working with mathematical or statistical concepts?', 'Moderately enjoy, I can apply them when needed'),
-(300, 5, 'How would you describe your communication style?', 'Collaborative and consensus-driven'),
-(301, 5, 'Are you more of a detail-oriented person or a big-picture thinker?', 'Mostly detail-oriented, but can see the big picture'),
-(302, 5, 'How do you handle repetitive tasks?', 'Strongly dislike repetitive tasks, I seek automation'),
-(303, 5, 'How important is innovation and creating new things to you?', 'Very important, I enjoy contributing to new ideas'),
-(304, 5, 'What drives you most in a career?', 'Opportunities for continuous learning and growth||Working with cutting-edge technologies');
+(474, 5, 'What is your ideal work environment?', 'Flexible environment with autonomy, creativity, and less rigid structure'),
+(475, 5, 'How do you prefer to approach problem-solving?', 'Experimenting and iterating quickly to find solutions'),
+(476, 5, 'What kind of tasks do you find most engaging?', 'Managing projects and coordinating teams||Researching new technologies and concepts||Securing systems and preventing attacks'),
+(477, 5, 'How do you prefer to learn new technologies or skills?', 'Hands-on coding/building projects'),
+(478, 5, 'How comfortable are you with continuous learning and adapting to new tools?', 'Extremely comfortable, I thrive on new challenges'),
+(479, 5, 'Which of the following areas interests you most?', 'Cloud Computing & DevOps'),
+(480, 5, 'Are you comfortable with abstract concepts and theoretical frameworks?', 'Somewhat comfortable, I prefer practical applications'),
+(481, 5, 'How much do you enjoy working with mathematical or statistical concepts?', 'Moderately enjoy, I can apply them when needed'),
+(482, 5, 'How would you describe your communication style?', 'Collaborative and consensus-driven'),
+(483, 5, 'Are you more of a detail-oriented person or a big-picture thinker?', 'Mostly detail-oriented, but can see the big picture'),
+(484, 5, 'How do you handle repetitive tasks?', 'Strongly dislike repetitive tasks, I seek automation'),
+(485, 5, 'How important is innovation and creating new things to you?', 'Very important, I enjoy contributing to new ideas'),
+(486, 5, 'What drives you most in a career?', 'Opportunities for continuous learning and growth||Working with cutting-edge technologies');
 
 -- --------------------------------------------------------
 
@@ -486,9 +486,11 @@ INSERT INTO `user_skills` (`user_id`, `skill_id`) VALUES
 (5, 87),
 (5, 88),
 (5, 89),
+(5, 90),
 (5, 91),
 (5, 93),
 (5, 94),
+(5, 95),
 (5, 97),
 (5, 100),
 (5, 101),
@@ -567,13 +569,13 @@ ALTER TABLE `careers`
 -- AUTO_INCREMENT for table `courses`
 --
 ALTER TABLE `courses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=88;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=89;
 
 --
 -- AUTO_INCREMENT for table `recommendations`
 --
 ALTER TABLE `recommendations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=423;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=594;
 
 --
 -- AUTO_INCREMENT for table `skills`
@@ -585,13 +587,13 @@ ALTER TABLE `skills`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `user_answers`
 --
 ALTER TABLE `user_answers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=305;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=487;
 
 --
 -- Constraints for dumped tables
