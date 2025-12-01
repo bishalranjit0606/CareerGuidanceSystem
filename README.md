@@ -127,7 +127,16 @@ CareerGuidanceSystem/
 └── database_schema.sql
 </pre>
 
-<h2>How to Run with Docker (Easiest Way)</h2>
+<h2>Installation & Setup</h2>
+
+<h3>1. Clone the Repository</h3>
+<p>First, clone the project to your local machine using Git:</p>
+<pre><code>git clone https://github.com/bishalranjit0606/Career-Guidance-System.git</code></pre>
+
+<h3>2. Choose Your Setup Method</h3>
+<p>You can run this project using either <strong>Docker</strong> (Recommended) or <strong>XAMPP</strong> (Manual Setup).</p>
+
+<h2>Option A: Run with Docker (Easiest Way)</h2>
 <p>You can run this project easily using Docker without setting up XAMPP manually.</p>
 
 <h3>Prerequisites</h3>
@@ -162,3 +171,29 @@ CareerGuidanceSystem/
 <h3>Stopping the App</h3>
 <p>To stop the project, run:</p>
 <pre><code>docker-compose down</code></pre>
+
+<h2>Option B: Manual Setup with XAMPP</h2>
+<p>If you prefer to run the project manually using XAMPP, follow these steps:</p>
+
+<h3>1. Move Project Files</h3>
+<ul>
+  <li>Copy the <code>CareerGuidanceSystem</code> folder.</li>
+  <li>Paste it into your XAMPP <code>htdocs</code> directory (usually <code>/Applications/XAMPP/xamppfiles/htdocs/</code> on Mac or <code>C:\xampp\htdocs\</code> on Windows).</li>
+</ul>
+
+<h3>2. Configure Database</h3>
+<ul>
+  <li>Start <strong>Apache</strong> and <strong>MySQL</strong> from the XAMPP Control Panel.</li>
+  <li>Open your browser and go to <a href="http://localhost/phpmyadmin">http://localhost/phpmyadmin</a>.</li>
+  <li>Create a new database named <code>career_guidance_db</code>.</li>
+  <li>Click on the database name, then go to the <strong>Import</strong> tab.</li>
+  <li>Choose the file <code>database/career_guidance_db.sql</code> from the project folder.</li>
+  <li>Click <strong>Go</strong> to import the tables.</li>
+</ul>
+
+<h3>3. Configure Database Connection</h3>
+<p>Ensure your <code>config/config.php</code> file is set to use the correct port (default is 3306). If you changed your MySQL port in XAMPP, update it in this file.</p>
+
+<h3>4. Run the Website</h3>
+<p>Open your browser and visit:</p>
+<a href="http://localhost/CareerGuidanceSystem">http://localhost/CareerGuidanceSystem</a>
