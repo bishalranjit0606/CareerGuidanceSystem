@@ -195,5 +195,5 @@ CareerGuidanceSystem/
 <p>Ensure your <code>config/config.php</code> file is set to use the correct port (default is 3306). If you changed your MySQL port in XAMPP, update it in this file.</p>
 
 <h3>4. Run the Website</h3>
-<p>Open your browser and visit:</p>
+<p>Open your browser and visit: </p>
 <a href="http://localhost/CareerGuidanceSystem">http://localhost/CareerGuidanceSystem</a>
