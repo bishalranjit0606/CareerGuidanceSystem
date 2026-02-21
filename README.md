@@ -23,12 +23,7 @@ This project is a website designed to help people find the best career path for 
 
 <h2>Login Credentials</h2>
 <ul>
-  <li><strong>User Account:</strong>
-    <ul>
-      <li>Email: <code>tester@gmail.com</code></li>
-      <li>Password: <code>tester@123</code></li>
-    </ul>
-  </li>
+  <li><strong>User Account:</strong> Please register a new user account, then log in.</li>
   <li><strong>Admin Account:</strong>
     <ul>
       <li>Email: <code>admin@gmail.com</code></li>
